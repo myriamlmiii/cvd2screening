@@ -1,0 +1,555 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   CVD 2.0 tokens. Light mode is primary. Dark mode is
+   institutional, not developer dark mode.
+   ============================================================ */
+:root {
+  /* White mode — true white canvas, dark ink. */
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f3f4f6;
+  --ink: #0c0e10;
+  --ink-2: #1f2428;
+  --ink-3: #3d444b;
+  --line: #d9dce0;
+  --line-strong: #b8bec4;
+
+  --cvd: #2f3d4d;
+  --cvd-soft: #e8eaed;
+
+  --positive: #157a42;
+  --warning: #8a5a10;
+  --critical: #b42318;
+  --info: #1f4f86;
+
+  --grid: #eceef1;
+  --sidebar: #f7f8fa;
+  --bronze: #8a6a3a;
+  --radar: #8a6a3a;
+  --map-empty: #e8eaed;
+
+  --select-glow-ring: #2f3d4d;
+  --select-glow: rgba(47, 61, 77, 0.28);
+  --grain-opacity: 0.012;
+  color-scheme: light;
+}
+
+.dark {
+  /* Sampled from tmeplar.jfif (dark quadrants): canvas #101820, panels #22282f,
+     bronze radar/invest ~#c4a57a, hairline #32383f. */
+  --canvas: #141920;
+  --surface: #22282f;
+  --surface-2: #2a3138;
+  --ink: #f3f4f6;
+  --ink-2: #c8ccd1;
+  --ink-3: #a7adb4;
+  --line: #32383f;
+  --line-strong: #3d454e;
+
+  --cvd: #c4a57a;
+  --cvd-soft: rgba(196, 165, 122, 0.16);
+
+  --positive: #5d9a7a;
+  --warning: #c4a57a;
+  --critical: #c46a62;
+  --info: #6a849c;
+
+  --grid: #2c343c;
+  --sidebar: #1a1e24;
+  --bronze: #c4a57a;
+  --radar: #b08968;
+  --map-empty: #1a2228;
+
+  --select-glow-ring: #c4a57a;
+  --select-glow: rgba(196, 165, 122, 0.35);
+  --grain-opacity: 0.02;
+  color-scheme: dark;
+}
+
+:root {
+  /* "Clash Display" loads from Fontshare (see app/layout.tsx head link) with
+     no next/font wrapper, so there's no generated CSS variable for it — set
+     the family by name directly, falling back to Space Grotesk (which does
+     have a guaranteed-loaded variable) rather than straight to system-ui. */
+  --font-display: "Clash Display", var(--font-heading), system-ui, sans-serif;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  position: relative;
+  background: var(--canvas);
+  color: var(--ink);
+  font-feature-settings: "cv05", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background-color 220ms ease-out, color 220ms ease-out;
+}
+
+/* Subtle grain — the one texture in the design system, applied once at the
+   shell level rather than per-component. Pure CSS: an inline SVG turbulence
+   filter as a fixed, non-interactive, low-opacity overlay. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.dark body::before {
+  mix-blend-mode: overlay;
+}
+
+/* Selection state shared by the Priority board and the command palette —
+   a pronounced ring + glow, not a dashed outline. */
+.select-glow {
+  box-shadow:
+    0 0 0 2px var(--select-glow-ring),
+    0 0 20px -2px var(--select-glow);
+}
+
+/* Physical theme swap: a circular reveal expanding from the toggle button,
+   driven by --vt-x/--vt-y set inline at click time. Falls back to an
+   instant swap when the View Transitions API or the click coordinates
+   aren't available. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+  ::view-transition-old(root) {
+    z-index: 1;
+  }
+  ::view-transition-new(root) {
+    z-index: 2;
+    animation: theme-reveal 520ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(150% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+}
+
+/* Undo toast progress bar (components/screening/PriorityBoardView.tsx). */
+@keyframes toast-shrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Command palette — holographic grid (components/CommandPalette.tsx). */
+.palette-holo {
+  position: relative;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--cvd) 14%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--cvd) 14%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+.palette-holo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--cvd) 16%, transparent) 50%,
+    transparent
+  );
+  background-size: 100% 220%;
+  animation: holo-scan 5s linear infinite;
+}
+@keyframes holo-scan {
+  from {
+    background-position: 0 -120%;
+  }
+  to {
+    background-position: 0 120%;
+  }
+}
+
+/* tabular numerals for anything financial */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* thin scrollbars, institutional */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 4px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--cvd) 22%, transparent);
+}
+
+html.analytics-light {
+  --canvas: #f0efe9;
+  --surface: #ffffff;
+  --surface-2: #ecebe6;
+  --ink: #2a2c30;
+  --ink-2: #6a6d72;
+  --ink-3: #8b8e93;
+  --line: #e2e1db;
+  --line-strong: #d0cfc8;
+  --cvd: #2f3d4d;
+  --cvd-soft: #e8e7e2;
+  --positive: #3d8a5c;
+  --warning: #a66a16;
+  --critical: #b53a3a;
+  --info: #496b8f;
+  --grid: #e8e7e2;
+  --sidebar: #f3f2ed;
+  --bronze: #c4a57a;
+  --radar: #b08968;
+  --map-empty: #e8e7e2;
+}
+html.analytics-light aside.sidebar-shell {
+  background: var(--sidebar);
+  color: #6b6d72;
+  border-right: 1px solid #e4e3dd;
+}
+html.analytics-light aside.sidebar-shell a {
+  color: inherit;
+}
+
+.dark aside.sidebar-shell {
+  background: var(--sidebar);
+}
+
+html.dark[data-page="workflow"] {
+  --canvas: #101820;
+  --surface: #1c242c;
+  --surface-2: #242c34;
+  --sidebar: #161c24;
+}
+
+.tpl-panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(20, 22, 24, 0.05);
+}
+.dark .tpl-panel {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.tpl-invest {
+  background: #c4a57a;
+  color: #1a1c18;
+}
+.tpl-starfield {
+  background-color: transparent;
+}
+html.dark[data-page="workflow"] .tpl-starfield {
+  background-color: #101820;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.18), transparent),
+    radial-gradient(1px 1px at 28% 62%, rgba(255,255,255,0.12), transparent),
+    radial-gradient(1px 1px at 44% 24%, rgba(255,255,255,0.16), transparent),
+    radial-gradient(1px 1px at 61% 78%, rgba(255,255,255,0.1), transparent),
+    radial-gradient(1px 1px at 73% 31%, rgba(255,255,255,0.14), transparent),
+    radial-gradient(1px 1px at 88% 58%, rgba(255,255,255,0.12), transparent),
+    radial-gradient(1.5px 1.5px at 51% 47%, rgba(255,255,255,0.08), transparent);
+}
+
+.kpi-figure {
+  transform: perspective(520px) rotateX(10deg) translateZ(0);
+  text-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .row-in {
+    animation: fade-in 220ms ease-out both;
+  }
+}
+
+/* Workflow column headers — sampled from template TR quadrant */
+.col-intake { background: #1a3a3c; color: #7ec8c4; }
+.col-screening { background: #4e3c60; color: #d2c4e4; }
+.col-reviewing { background: #3c4866; color: #c5d0e8; }
+.col-shortlisted { background: #2a4a40; color: #9fd4b8; }
+.col-pass { background: #5a5448; color: #e6d3b4; }
+
+/* recharts: keep charts quiet */
+.recharts-cartesian-axis-tick text {
+  fill: var(--ink-3);
+  font-size: 10px;
+  font-family: var(--font-mono), "IBM Plex Mono", monospace;
+}
+.recharts-cartesian-grid line {
+  stroke: var(--grid);
+  stroke-dasharray: none;
+}
+.recharts-polar-grid-angle line,
+.recharts-polar-grid-concentric-polygon,
+.recharts-polar-grid-concentric-circle {
+  stroke-dasharray: none !important;
+}
+.recharts-tooltip-wrapper:focus {
+  outline: none;
+}
+
+/* ---- 3D scene (main canvas) ---- */
+.scene-3d {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  perspective: 1100px;
+}
+.scene-3d__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+}
+.scene-3d__glow--a {
+  top: -12%;
+  right: 8%;
+  width: 42vw;
+  height: 42vw;
+  background: radial-gradient(circle, color-mix(in srgb, var(--bronze) 38%, transparent), transparent 70%);
+}
+.scene-3d__glow--b {
+  bottom: 4%;
+  left: 18%;
+  width: 36vw;
+  height: 36vw;
+  background: radial-gradient(circle, color-mix(in srgb, var(--cvd) 22%, transparent), transparent 72%);
+}
+.scene-3d__floor {
+  position: absolute;
+  left: -25%;
+  right: -25%;
+  bottom: -28%;
+  height: 78%;
+  transform: rotateX(64deg);
+  transform-origin: center top;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 14%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 14%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 78%);
+}
+.dark .scene-3d__floor {
+  background-image:
+    linear-gradient(rgba(196, 165, 122, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(196, 165, 122, 0.16) 1px, transparent 1px);
+}
+.scene-3d__horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 34%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--bronze) 55%, transparent), transparent);
+  opacity: 0.7;
+}
+
+/* ---- 3D U-Investors mark ---- */
+.u-logo {
+  --rx: 0deg;
+  --ry: 0deg;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.u-logo__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+  transform: perspective(820px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 180ms ease-out;
+}
+.u-logo--hero .u-logo__stage {
+  width: 118px;
+  height: 118px;
+}
+.u-logo--nav .u-logo__stage {
+  width: 22px;
+  height: 22px;
+}
+.u-logo__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 28%;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--bronze) 88%, white), #5c4a2e 48%, #1a1612);
+  box-shadow:
+    0 18px 28px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.35);
+  transform: translateZ(-12px);
+}
+.u-logo--nav .u-logo__ring {
+  border-radius: 30%;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.u-logo__mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+  font-family: var(--font-display), var(--font-heading), sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  color: #f4ead6;
+}
+.u-logo__face {
+  position: relative;
+  z-index: 2;
+  display: block;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  transform: translateZ(14px);
+}
+.u-logo__slice {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  color: #6a542e;
+  transform: translate(-50%, -50%) translateZ(calc(var(--i) * -1.5px));
+}
+.u-logo--hero .u-logo__mark {
+  font-size: 64px;
+}
+.u-logo--nav .u-logo__mark {
+  font-size: 13px;
+}
+.u-logo__word {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.u-logo__name {
+  font-family: var(--font-display), var(--font-heading), sans-serif;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+}
+.u-logo__tag {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .u-logo--hero .u-logo__stage {
+    animation: logo-float 5.5s ease-in-out infinite;
+  }
+}
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: perspective(820px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(0);
+  }
+  50% {
+    transform: perspective(820px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-7px);
+  }
+}
+
+.pipeline-depth {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+  perspective: 900px;
+}
+.pipeline-depth__layer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 6px;
+  padding: 8px 8px 6px;
+  text-align: left;
+  color: var(--ink);
+  transform: translateZ(var(--z, 0px)) rotateX(8deg);
+  transition: transform 160ms ease, background 160ms ease;
+}
+.pipeline-depth__layer:hover {
+  background: var(--surface-2);
+  transform: translateZ(18px) rotateX(4deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-depth__layer,
+  .pipeline-depth__layer:hover {
+    transform: none;
+  }
+}
+@media (max-width: 768px) {
+  .pipeline-depth {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.file-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  perspective: 920px;
+}
+.file-wall__folder {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 10px 10px 8px;
+  text-align: left;
+  color: var(--ink);
+  transform: rotateX(9deg) translateZ(0);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.file-wall__folder:hover {
+  transform: rotateX(2deg) translateZ(14px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+.workflow-card {
+  transform: perspective(640px) rotateX(4deg);
+  transition: transform 140ms ease;
+}
+.workflow-card:hover {
+  transform: perspective(640px) rotateX(0deg) translateY(-2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .file-wall__folder,
+  .file-wall__folder:hover,
+  .workflow-card,
+  .workflow-card:hover {
+    transform: none;
+  }
+}
