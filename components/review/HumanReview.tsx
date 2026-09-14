@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useLocale } from "@/lib/i18n";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import type { HumanDecision } from "@/types";
 
@@ -71,8 +72,10 @@ export function HumanReview({
           );
         })}
       </div>
-      <button
+      <Button
         type="button"
+        variant="secondary"
+        size="xs"
         disabled={!ready}
         onClick={() => {
           if (!decision) return;
@@ -81,10 +84,10 @@ export function HumanReview({
           setReason("");
           setTags([]);
         }}
-        className="mt-2 h-7 w-full rounded-md border border-line text-[11px] font-semibold disabled:opacity-40"
+        className="mt-2 h-7 w-full"
       >
         {t("pages.confirmDecision")}
-      </button>
+      </Button>
     </div>
   );
 }

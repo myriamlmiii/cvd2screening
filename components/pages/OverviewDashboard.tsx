@@ -5,14 +5,12 @@ import dynamic from "next/dynamic";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { ScoreRadar } from "@/components/charts/ScoreRadar";
 import { Sparkline } from "@/components/charts/Sparkline";
-import { TiltCard } from "@/components/ui/TiltCard";
 import { PipelineDepth } from "@/components/viz/PipelineDepth";
 import { DashCard, DealAvatar, SelectFilter } from "@/components/ui/Dash";
-import { radarAxes, risks, scoreLabel, strengths, summary } from "@/lib/deal-view";
+import { Button } from "@/components/ui/Button";
+import { scoreLabel, summary } from "@/lib/deal-view";
 import { aiRecommendation, crmStatus } from "@/lib/crm";
-import { postDecisions } from "@/lib/decisions";
 import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { OverviewPayload } from "@/lib/startups/dashboard";
@@ -32,8 +30,6 @@ export function OverviewDashboard({ initial }: { initial: OverviewPayload }) {
   const [sector, setSector] = useState("all");
   const [origin, setOrigin] = useState("all");
   const [queueStatus, setQueueStatus] = useState("all");
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
   const { data } = useQuery({
     queryKey: ["overview", status, sector, origin],
@@ -58,36 +54,21 @@ export function OverviewDashboard({ initial }: { initial: OverviewPayload }) {
   const cards = data.cards as ScoredDeal[];
   const queue = (queueStatus === "all" ? data.queue : data.queue.filter((d) => (d.status || "—") === queueStatus)).slice(0, 8);
 
-  const decide = async (id: string, gpDecision: "Invest" | "Watch" | "Pass") => {
-    setBusyId(id);
-    setNotice(null);
-    const { previous, error } = await postDecisions([{ id, gpDecision }]);
-    setBusyId(null);
-    if (error) setNotice(error);
-    else if (previous) router.refresh();
-  };
-
   return (
     <div className="grid gap-2 xl:grid-cols-[minmax(0,1fr)_220px]">
       <div className="min-w-0">
         <div className="mb-2 flex items-center justify-between gap-2">
           <h1 className="font-sans text-[14px] font-semibold tracking-tight text-ink md:text-[15px]">{t("pages.overviewTitle")}</h1>
-          <button type="button" onClick={() => window.dispatchEvent(new Event("cvd:open-palette"))} className="inline-flex h-6 items-center gap-1 rounded-md bg-[#c4a57a] px-2 text-[10px] font-semibold text-[#1a1c18]">
+          <Button type="button" size="xs" onClick={() => window.dispatchEvent(new Event("cvd:open-palette"))}>
             <Plus className="h-3 w-3" />
             {t("pages.newStartup")}
-          </button>
+          </Button>
         </div>
 
         <div className="mb-2 grid gap-2 sm:grid-cols-3">
-          <TiltCard>
-            <Kpi label={t("pages.totalStartups")} value={String(data.total)} spark={spark} onClick={() => router.push("/review")} />
-          </TiltCard>
-          <TiltCard>
-            <Kpi label={t("pages.awaitingReview")} value={String(awaiting)} spark={splitSpark} onClick={() => router.push("/review?queue=1")} />
-          </TiltCard>
-          <TiltCard>
-            <Kpi label={t("pages.strongFits")} value={String(strong)} spark={spark} gold onClick={() => router.push("/review?rec=Strong%20Fit")} />
-          </TiltCard>
+          <Kpi label={t("pages.totalStartups")} value={String(data.total)} spark={spark} onClick={() => router.push("/review")} />
+          <Kpi label={t("pages.awaitingReview")} value={String(awaiting)} spark={splitSpark} onClick={() => router.push("/review?queue=1")} />
+          <Kpi label={t("pages.strongFits")} value={String(strong)} spark={spark} gold onClick={() => router.push("/review?rec=Strong%20Fit")} />
         </div>
         {statuses.length > 0 ? (
           <div className="mb-2">
@@ -95,7 +76,6 @@ export function OverviewDashboard({ initial }: { initial: OverviewPayload }) {
           </div>
         ) : null}
         {insight ? <p className="mb-2 text-[10px] font-medium text-ink-2">{insight}</p> : null}
-        {notice ? <p className="mb-2 text-[10px] font-medium text-critical">{notice}</p> : null}
 
         <div className="mb-2 flex flex-wrap items-center gap-1.5">
           <SelectFilter label={t("pages.status")} value={status} onChange={setStatus} options={[{ value: "all", label: t("pages.all") }, ...statuses.map((s) => ({ value: s.label, label: s.label }))]} />
@@ -114,45 +94,19 @@ export function OverviewDashboard({ initial }: { initial: OverviewPayload }) {
         </div>
 
         <div className="grid gap-2 md:grid-cols-3">
-          {cards.map((deal, i) => {
-            const showRisks = i === 2;
-            const bullets = showRisks ? risks(deal) : strengths(deal);
-            return (
-              <DashCard key={deal.id} className="flex cursor-pointer flex-col" onClick={() => router.push(`/review?id=${encodeURIComponent(deal.id)}`)}>
-                <div className="flex items-start gap-2">
-                  <DealAvatar name={deal.name} />
-                  <div className="min-w-0">
-                    <div className="truncate text-[12px] font-semibold text-ink">{deal.name}</div>
-                    <div className="text-[10px] font-medium text-ink">{deal.sector || "—"} · {crmStatus(deal)} · {aiRecommendation(deal)}</div>
-                  </div>
+          {cards.map((deal) => (
+            <DashCard key={deal.id} className="flex cursor-pointer flex-col" onClick={() => router.push(`/review?id=${encodeURIComponent(deal.id)}`)}>
+              <div className="flex items-start gap-2">
+                <DealAvatar name={deal.name} />
+                <div className="min-w-0">
+                  <div className="truncate text-[12px] font-semibold text-ink">{deal.name}</div>
+                  <div className="text-[10px] font-medium text-ink-2">{deal.sector || "—"} · {crmStatus(deal)} · {aiRecommendation(deal)}</div>
                 </div>
-                <p className="mt-1.5 line-clamp-2 text-[10.5px] leading-snug text-ink">{summary(deal)}</p>
-                <ScoreRadar axes={radarAxes(deal)} size={108} />
-                <div className="mt-0.5 text-[10px] font-medium text-ink">
-                  <div className="mb-1">{showRisks ? t("pages.risks") : t("pages.strengths")}</div>
-                  <ul className="space-y-1">
-                    {bullets.map((s) => (
-                      <li key={s} className="flex gap-1.5">
-                        <span className={cn("mt-1.5 h-1 w-1 shrink-0 rounded-full", showRisks ? "bg-critical" : "bg-[#c4a57a]")} />
-                        <span className="line-clamp-2">{s}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-2 grid grid-cols-3 gap-1">
-                  <button type="button" disabled={busyId === deal.id} onClick={(e) => { e.stopPropagation(); decide(deal.id, "Invest"); }} className="h-6 rounded-md bg-[#c4a57a] text-[10px] font-semibold text-[#1a1c18]">
-                    {t("pages.invest")}
-                  </button>
-                  <button type="button" disabled={busyId === deal.id} onClick={(e) => { e.stopPropagation(); decide(deal.id, "Watch"); }} className="h-6 rounded-md border border-line text-[10px] font-semibold text-ink">
-                    {t("pages.watch")}
-                  </button>
-                  <button type="button" disabled={busyId === deal.id} onClick={(e) => { e.stopPropagation(); decide(deal.id, "Pass"); }} className="h-6 rounded-md border border-line text-[10px] font-semibold text-ink">
-                    {t("pages.pass")}
-                  </button>
-                </div>
-              </DashCard>
-            );
-          })}
+                <span className="ml-auto font-mono text-[12px] font-semibold">{scoreLabel(deal)}</span>
+              </div>
+              <p className="mt-1.5 line-clamp-2 text-[10.5px] leading-snug text-ink-2">{summary(deal)}</p>
+            </DashCard>
+          ))}
         </div>
       </div>
 

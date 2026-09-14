@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n";
 import { ThemeToggle } from "@/components/shell/ThemeToggle";
+import { Button } from "@/components/ui/Button";
 
 const MOBILE_NAV = [
   { key: "nav.overview", href: "/" },
@@ -18,6 +19,11 @@ const MOBILE_NAV = [
 export function TopBar() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocale();
+
+  const signOut = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  };
 
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-canvas/90 backdrop-blur-md">
@@ -49,6 +55,9 @@ export function TopBar() {
               English
             </button>
           </div>
+          <Button type="button" variant="ghost" size="xs" onClick={signOut} className="uppercase tracking-wide">
+            Sign out
+          </Button>
         </div>
       </div>
 

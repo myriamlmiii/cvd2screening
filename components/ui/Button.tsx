@@ -11,6 +11,7 @@ const button = cva(
         ghost: "text-ink-2 hover:bg-surface-2 hover:text-ink",
       },
       size: {
+        xs: "h-6 px-2 text-[10px]",
         sm: "h-8 px-3 text-body-sm",
         md: "h-9 px-4 text-body-sm",
       },

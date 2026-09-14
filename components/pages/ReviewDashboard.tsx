@@ -15,6 +15,7 @@ import { classifyFromName, normalizeDocumentType } from "@/lib/documents/categor
 import { Plus, Search } from "lucide-react";
 import { ScoreRadar } from "@/components/charts/ScoreRadar";
 import { DashCard, DealAvatar, SelectFilter } from "@/components/ui/Dash";
+import { Button } from "@/components/ui/Button";
 import { statusBadgeClass } from "@/lib/airtable";
 import { radarAxes, risks, scoreLabel, strengths, summary, toScoreAxes } from "@/lib/deal-view";
 import { postDecisions } from "@/lib/decisions";
@@ -199,14 +200,10 @@ export function ReviewDashboard({
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("cvd:open-palette"))}
-            className="inline-flex h-6 items-center gap-1 rounded-md bg-[#c4a57a] px-2 text-[10px] font-semibold text-[#1a1c18]"
-          >
+          <Button type="button" size="xs" onClick={() => window.dispatchEvent(new Event("cvd:open-palette"))}>
             <Plus className="h-3 w-3" />
             {t("pages.newStartup")}
-          </button>
+          </Button>
         </div>
       </div>
 

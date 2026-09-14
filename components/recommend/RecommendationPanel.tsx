@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashCard } from "@/components/ui/Dash";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import type { ScoredDeal } from "@/types";
 import type { IcMemo } from "@/lib/ic-memo";
@@ -96,14 +97,9 @@ export function RecommendationPanel({
             {memo.recommendation}
           </span>
         ) : (
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => request(deal)}
-            className="h-6 rounded-md bg-[#c4a57a] px-2 text-[10px] font-semibold text-[#1a1c18] disabled:opacity-50"
-          >
+          <Button type="button" size="xs" disabled={loading} onClick={() => request(deal)}>
             {loading ? "Drafting…" : "Draft IC memo"}
-          </button>
+          </Button>
         )}
       </div>
       {loading && <p className="mt-2 text-[11px] text-ink-3">Drafting from the file on record…</p>}

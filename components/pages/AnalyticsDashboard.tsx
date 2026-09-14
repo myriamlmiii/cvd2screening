@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { ScreeningLandscape } from "@/components/charts/ScreeningLandscape";
 import { Sparkline } from "@/components/charts/Sparkline";
 import { DashCard } from "@/components/ui/Dash";
-import { TiltCard } from "@/components/ui/TiltCard";
 import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import type { AnalyticsPayload } from "@/lib/startups/dashboard";
@@ -116,18 +115,10 @@ export function AnalyticsDashboard({ initial }: { initial: AnalyticsPayload }) {
           </div>
 
           <div className="mt-2 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-            <TiltCard>
-              <MetricTile label="Startups" value={String(total)} sub={`Awaiting review ${waiting}`} caption="Deal flow" series={spark} />
-            </TiltCard>
-            <TiltCard>
-              <MetricTile label="Average AI score" value={average == null ? "—" : average.toFixed(1)} sub={`Inflow Δ ${inflow}`} caption="Scored deals only" series={spark} />
-            </TiltCard>
-            <TiltCard>
-              <MetricTile label="Sector types" value={String(sectors.length)} sub={`${countries.length} geographies`} caption="CRM universe" series={spark} />
-            </TiltCard>
-            <TiltCard>
-              <MetricTile label="Data completeness" value={`${avgComplete}%`} sub="Field coverage, not quality" caption="" series={spark} />
-            </TiltCard>
+            <MetricTile label="Startups" value={String(total)} sub={`Awaiting review ${waiting}`} caption="Deal flow" series={spark} />
+            <MetricTile label="Average AI score" value={average == null ? "—" : average.toFixed(1)} sub={`Inflow Δ ${inflow}`} caption="Scored deals only" series={spark} />
+            <MetricTile label="Sector types" value={String(sectors.length)} sub={`${countries.length} geographies`} caption="CRM universe" series={spark} />
+            <MetricTile label="Data completeness" value={`${avgComplete}%`} sub="Field coverage, not quality" caption="" series={spark} />
           </div>
         </>
       )}

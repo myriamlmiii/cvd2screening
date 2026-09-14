@@ -64,8 +64,6 @@ export function SceneBackground() {
     <div className="scene-3d" aria-hidden>
       <div className="scene-3d__glow scene-3d__glow--a" />
       <div className="scene-3d__glow scene-3d__glow--b" />
-      <div className="scene-3d__floor" />
-      <div className="scene-3d__horizon" />
     </div>
   );
 }

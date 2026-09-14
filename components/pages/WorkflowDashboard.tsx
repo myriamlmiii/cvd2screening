@@ -4,6 +4,7 @@ import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { DashCard, DealAvatar, SelectFilter } from "@/components/ui/Dash";
+import { Button } from "@/components/ui/Button";
 import { daysInStage, scoreLabel } from "@/lib/deal-view";
 import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -139,9 +140,15 @@ export function WorkflowDashboard({ initial }: { initial: WorkflowPayload }) {
             <StatRing label="Internal %" value={split.pct.toFixed(1)} />
             <StatRing label={t("pages.averageScore")} value={average == null ? "—" : average.toFixed(1)} />
           </div>
-          <button type="button" className="mt-2 w-full text-right text-[10px] font-medium text-[#c4a57a]" onClick={() => router.push("/review?queue=1")}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className="mt-2 w-full justify-end text-[#c4a57a] hover:bg-transparent hover:text-[#c4a57a]"
+            onClick={() => router.push("/review?queue=1")}
+          >
             Open review queue
-          </button>
+          </Button>
         </DashCard>
       </div>
     </div>
