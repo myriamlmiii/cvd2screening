@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { withBackoff } from "@/lib/retry";
 import { logOp } from "@/lib/log";
+import { serviceAccountAccessToken } from "@/lib/google/service-account";
 import { supabaseAdmin } from "@/lib/services/supabase-rest";
 import { extractDriveFile } from "@/lib/services/drive-extract";
 import { classifyDocument, pickDescriptionText } from "@/lib/services/document-classify";
@@ -34,6 +35,14 @@ export function isYearFolderName(name: string): boolean {
   return /^(19|20)\d{2}$/.test(name.trim());
 }
 
+/** Comma-separated Drive folder IDs — each a root to walk independently (e.g. one per intake year). */
+export function driveFolderIds(): string[] {
+  return (process.env.GOOGLE_DRIVE_FOLDER_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 function fileSize(file: DriveFile): number | null {
   if (file.size == null) return null;
   const n = Number(file.size);
@@ -42,28 +51,6 @@ function fileSize(file: DriveFile): number | null {
 
 function fileStamp(file: DriveFile): string {
   return file.md5Checksum || file.modifiedTime || contentHash([file.id, file.name]);
-}
-
-async function googleAccessToken(): Promise<string | null> {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refresh = process.env.GOOGLE_REFRESH_TOKEN;
-  if (!clientId || !clientSecret || !refresh) return null;
-  const res = await withBackoff(() =>
-    fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refresh,
-      }),
-    }),
-  );
-  if (!res.ok) throw new Error(`Google token ${res.status}`);
-  const json = (await res.json()) as { access_token?: string };
-  return json.access_token ?? process.env.GOOGLE_ACCESS_TOKEN ?? null;
 }
 
 async function listChildren(token: string, folderId: string): Promise<DriveFile[]> {
@@ -112,7 +99,27 @@ export async function listFilesRecursive(
   return out;
 }
 
-export async function discoverStartupFolders(token: string, rootId: string): Promise<{ year: string | null; folder: DriveFile }[]> {
+async function getFolderName(token: string, id: string): Promise<string | null> {
+  const url = new URL(`https://www.googleapis.com/drive/v3/files/${id}`);
+  url.searchParams.set("fields", "id,name");
+  url.searchParams.set("supportsAllDrives", "true");
+  const res = await withBackoff(() => fetch(url, { headers: { Authorization: `Bearer ${token}` } }));
+  if (!res.ok) return null;
+  const json = (await res.json()) as { name?: string };
+  return json.name ?? null;
+}
+
+/**
+ * Discovers startup folders under a root. Two shapes are supported:
+ *  - root contains year-named subfolders (2024/2025/...), each holding startup folders
+ *  - root IS itself a year folder (or has no year structure) — its direct children are startups,
+ *    tagged with `fallbackYear` when the root's own Drive name looks like a year (e.g. "2026").
+ */
+export async function discoverStartupFolders(
+  token: string,
+  rootId: string,
+  fallbackYear: string | null = null,
+): Promise<{ year: string | null; folder: DriveFile }[]> {
   const top = await listChildren(token, rootId);
   const years = top.filter((f) => f.mimeType === FOLDER && isYearFolderName(f.name));
   const startups: { year: string | null; folder: DriveFile }[] = [];
@@ -126,9 +133,23 @@ export async function discoverStartupFolders(token: string, rootId: string): Pro
     return startups;
   }
   for (const kid of top) {
-    if (kid.mimeType === FOLDER) startups.push({ year: null, folder: kid });
+    if (kid.mimeType === FOLDER) startups.push({ year: fallbackYear, folder: kid });
   }
   return startups;
+}
+
+/** Every startup folder across every configured Drive root, year-tagged from the root's own Drive name when it's a year folder. */
+export async function discoverAllStartupFolders(
+  token: string,
+  rootIds: string[],
+): Promise<{ year: string | null; folder: DriveFile }[]> {
+  const all: { year: string | null; folder: DriveFile }[] = [];
+  for (const rootId of rootIds) {
+    const name = await getFolderName(token, rootId);
+    const fallbackYear = name && isYearFolderName(name) ? name : null;
+    all.push(...(await discoverStartupFolders(token, rootId, fallbackYear)));
+  }
+  return all;
 }
 
 async function existingDocs(startupId: string): Promise<StartupDocumentRow[]> {
@@ -184,7 +205,7 @@ export async function ingestGoogleDrive(): Promise<{
   stageChanges: number;
   missingLogged: number;
 }> {
-  const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+  const folderIds = driveFolderIds();
   const stats = {
     seen: 0,
     processed: 0,
@@ -198,10 +219,10 @@ export async function ingestGoogleDrive(): Promise<{
     stageChanges: 0,
     missingLogged: 0,
   };
-  if (!folderId) return stats;
-  const token = (await googleAccessToken()) || process.env.GOOGLE_ACCESS_TOKEN || null;
+  if (!folderIds.length) return stats;
+  const token = await serviceAccountAccessToken();
   if (!token) {
-    logOp({ op: "drive.ingest", status: "skipped", error: "missing google oauth" });
+    logOp({ op: "drive.ingest", status: "skipped", error: "missing google service account key" });
     return stats;
   }
   const running = await supabaseAdmin<{ started_at: string }[]>(
@@ -214,7 +235,7 @@ export async function ingestGoogleDrive(): Promise<{
   }
   const runId = await startSyncRun("GOOGLE_DRIVE");
   try {
-    const startupFolders = await discoverStartupFolders(token, folderId);
+    const startupFolders = await discoverAllStartupFolders(token, folderIds);
     stats.startups = startupFolders.length;
     const candidates = await loadIdentityCandidates();
 

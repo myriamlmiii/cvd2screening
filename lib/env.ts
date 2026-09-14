@@ -12,11 +12,12 @@ export const envSchema = z.object({
   GROQ_API_KEY: z.string().optional(),
   INTAKE_WEBHOOK_SECRET: z.string().optional(),
   AUTH_REQUIRED: z.enum(["true", "false"]).optional(),
+  AUTH_SECRET: z.string().optional(),
+  DEMO_EMAIL: z.string().optional(),
+  DEMO_PASSWORD: z.string().optional(),
   APP_ROLE: z.enum(["Viewer", "Reviewer", "Admin"]).optional(),
-  GOOGLE_DRIVE_FOLDER_ID: z.string().optional(),
-  GOOGLE_CLIENT_ID: z.string().optional(),
-  GOOGLE_CLIENT_SECRET: z.string().optional(),
-  GOOGLE_REFRESH_TOKEN: z.string().optional(),
+  GOOGLE_DRIVE_FOLDER_IDS: z.string().optional(),
+  GOOGLE_SERVICE_ACCOUNT_KEY: z.string().optional(),
   AI_PROVIDER: z.enum(["groq", "openai", "anthropic"]).optional(),
 });
 

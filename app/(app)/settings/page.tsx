@@ -1,6 +1,8 @@
 import { DashCard } from "@/components/ui/Dash";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { supabaseAnon } from "@/lib/services/supabase-rest";
+import { isServiceAccountConfigured } from "@/lib/google/service-account";
+import { driveFolderIds } from "@/lib/services/drive-ingest";
 
 export const dynamic = "force-dynamic";
 
@@ -9,21 +11,22 @@ const MODULES = [
   { name: "Airtable Synchronization", env: "AIRTABLE_TOKEN", note: "Live PIPELINE + POST /api/sync/airtable" },
   { name: "AI Screening", env: "GROQ_API_KEY", note: "Groq — memos and Python screening" },
   { name: "Decision log", env: "SUPABASE_SERVICE_ROLE_KEY", note: "Immutable decision_events" },
-  { name: "Google Drive", env: "GOOGLE_DRIVE_FOLDER_ID", note: "Standing ingest · POST /api/sync/drive" },
+  { name: "Google Drive", env: "GOOGLE_DRIVE_FOLDER_IDS", note: "Standing ingest · POST /api/sync/drive" },
 ] as const;
 
 export default async function SettingsPage() {
   const airtable = Boolean(process.env.AIRTABLE_TOKEN || process.env.AIRTABLE_API_KEY);
   const groq = Boolean(process.env.GROQ_API_KEY);
   const intake = Boolean(process.env.INTAKE_WEBHOOK_SECRET);
-  const drive = Boolean(process.env.GOOGLE_DRIVE_FOLDER_ID);
+  const folderIds = driveFolderIds();
+  const drive = folderIds.length > 0 && isServiceAccountConfigured();
   const supabaseWrites = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_URL);
   const on: Record<string, boolean> = {
     AIRTABLE_TOKEN: airtable,
     GROQ_API_KEY: groq,
     INTAKE_WEBHOOK_SECRET: intake,
     SUPABASE_SERVICE_ROLE_KEY: supabaseWrites,
-    GOOGLE_DRIVE_FOLDER_ID: drive,
+    GOOGLE_DRIVE_FOLDER_IDS: drive,
   };
 
   const runsFull = await supabaseAnon<
@@ -66,9 +69,9 @@ export default async function SettingsPage() {
     <div className="text-ink">
       <h1 className="mb-2 font-sans text-[14px] font-semibold md:text-[15px]">Automations</h1>
       <DashCard className="mb-3">
-        <div className="text-[12px] font-semibold">Public CRM data</div>
+        <div className="text-[12px] font-semibold">Access</div>
         <p className="mt-1 text-[11px] text-ink-2">
-          AUTH_REQUIRED is off. Visitors see the Airtable snapshot (~247 companies) without an admin login. If live Airtable, Drive, or Supabase fail, that snapshot stays. Turning on AUTH_REQUIRED would gate the UI behind a cookie — it is not required to keep deal data on the site.
+          The CRM opens on a sign-in page. Preview account: investors123@gmail.com / 1234@5. This is demo access for supervisors, not production identity. Snapshot deal data still loads if Airtable or Drive is down.
         </p>
       </DashCard>
       <p className="mb-3 max-w-2xl text-[11px] text-ink-2">
@@ -93,7 +96,7 @@ export default async function SettingsPage() {
       <h2 className="mb-2 mt-4 text-[12px] font-semibold">Drive agent log</h2>
       <DashCard padded={false}>
         {!runs.ok || !runs.data?.length ? (
-          <p className="px-3 py-4 text-[11px] text-ink-3">No Drive sync runs recorded yet. After OAuth, POST /api/sync/drive or land on /?code=…</p>
+          <p className="px-3 py-4 text-[11px] text-ink-3">No Drive sync runs recorded yet. Once the Drive folder is shared with the service account, trigger a run: POST /api/sync/drive.</p>
         ) : (
           <table className="w-full text-left text-[11px]">
             <thead className="text-[10px] uppercase text-ink-3">

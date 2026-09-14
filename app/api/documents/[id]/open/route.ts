@@ -1,33 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/services/supabase-rest";
-import { withBackoff } from "@/lib/retry";
+import { serviceAccountAccessToken } from "@/lib/google/service-account";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const STREAM_CAP = 50 * 1024 * 1024;
-
-async function googleAccessToken(): Promise<string | null> {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const refresh = process.env.GOOGLE_REFRESH_TOKEN;
-  if (!clientId || !clientSecret || !refresh) return null;
-  const res = await withBackoff(() =>
-    fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refresh,
-      }),
-    }),
-  );
-  if (!res.ok) return null;
-  const json = (await res.json()) as { access_token?: string };
-  return json.access_token ?? null;
-}
 
 export async function GET(_req: Request, { params }: { params: { id: string } }) {
   const fileId = params.id;
@@ -48,7 +26,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     }, { status: 413 });
   }
 
-  const token = await googleAccessToken();
+  const token = await serviceAccountAccessToken();
   if (!token) {
     return NextResponse.json({
       error: "Drive connector is offline. Document metadata remains in the CRM.",

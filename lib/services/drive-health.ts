@@ -1,4 +1,6 @@
 import { supabaseAnon } from "@/lib/services/supabase-rest";
+import { isServiceAccountConfigured } from "@/lib/google/service-account";
+import { driveFolderIds } from "@/lib/services/drive-ingest";
 import type { SyncRunRow } from "@/lib/domain/crm";
 
 export type DriveConnectorHealth = {
@@ -11,12 +13,7 @@ export type DriveConnectorHealth = {
 };
 
 function driveConfigured(): boolean {
-  return Boolean(
-    process.env.GOOGLE_DRIVE_FOLDER_ID &&
-      process.env.GOOGLE_CLIENT_ID &&
-      process.env.GOOGLE_CLIENT_SECRET &&
-      process.env.GOOGLE_REFRESH_TOKEN,
-  );
+  return driveFolderIds().length > 0 && isServiceAccountConfigured();
 }
 
 export async function getDriveConnectorHealth(): Promise<DriveConnectorHealth> {
@@ -31,7 +28,7 @@ export async function getDriveConnectorHealth(): Promise<DriveConnectorHealth> {
   const connected = configured && (!run || run.status !== "FAILED");
   const when = lastSuccessAt ? new Date(lastSuccessAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : null;
   const message = !configured
-    ? "Google Drive is not connected. Existing CRM records stay available; new Drive folders will not appear until an admin connects Drive."
+    ? "Google Drive is not connected. Set GOOGLE_DRIVE_FOLDER_IDS and GOOGLE_SERVICE_ACCOUNT_KEY, then share each Drive folder with the service account's email."
     : run?.status === "FAILED"
       ? `Google Drive connection requires attention.${when ? ` Last successful sync: ${when}.` : ""} Existing startups remain in the CRM.`
       : when

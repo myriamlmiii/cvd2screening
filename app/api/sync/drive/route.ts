@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentRole } from "@/lib/auth/role";
-import { ingestGoogleDrive } from "@/lib/services/drive-ingest";
+import { ingestGoogleDrive, driveFolderIds } from "@/lib/services/drive-ingest";
 import { getDriveConnectorHealth } from "@/lib/services/drive-health";
 import { logOp } from "@/lib/log";
 
@@ -46,9 +46,9 @@ export async function POST(req: Request) {
   if (!authorized(req)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
-  if (!process.env.GOOGLE_DRIVE_FOLDER_ID) {
+  if (!driveFolderIds().length) {
     const drive = await getDriveConnectorHealth();
-    return NextResponse.json({ status: "skipped", message: "GOOGLE_DRIVE_FOLDER_ID is not set.", drive });
+    return NextResponse.json({ status: "skipped", message: "GOOGLE_DRIVE_FOLDER_IDS is not set.", drive });
   }
   try {
     const stats = await runIngest();
