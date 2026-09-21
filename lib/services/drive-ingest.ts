@@ -11,6 +11,7 @@ import { engagementFactsFromDocs, engagementSignalFromFacts } from "@/lib/docume
 import { normalizeDocumentType } from "@/lib/documents/categories";
 import { upsertFromRaw, loadIdentityCandidates } from "@/lib/services/startup-service";
 import { processQueuedScreenings } from "@/lib/services/screening-run";
+import { ingestCrmLinkedDocuments } from "@/lib/services/crm-documents";
 import { finishSyncRun, startSyncRun } from "@/lib/services/sync-runs";
 import { recordActivity } from "@/lib/services/activity";
 import { contentHash } from "@/lib/normalize";
@@ -219,10 +220,25 @@ export async function ingestGoogleDrive(): Promise<{
     stageChanges: 0,
     missingLogged: 0,
   };
-  if (!folderIds.length) return stats;
+  const linked = await ingestCrmLinkedDocuments();
+  stats.seen += linked.seen;
+  stats.created += linked.created;
+  stats.skipped += linked.skipped;
+  stats.failed += linked.failed;
+  stats.startups += linked.startups;
   const token = await serviceAccountAccessToken();
   if (!token) {
-    logOp({ op: "drive.ingest", status: "skipped", error: "missing google service account key" });
+    const runId = await startSyncRun("GOOGLE_DRIVE");
+    await finishSyncRun(runId, {
+      status: "PARTIAL",
+      records_seen: linked.seen,
+      records_created: linked.created,
+      records_skipped: linked.skipped,
+      records_failed: linked.failed,
+      error_summary: linked.error || "GOOGLE_SERVICE_ACCOUNT_KEY is empty. Indexed CRM/Airtable file links only; folder walk skipped.",
+      details: { crm_links: linked },
+    });
+    logOp({ op: "drive.ingest", status: "partial", startups: linked.startups, seen: linked.seen, created: linked.created, failed: linked.failed, error: linked.error || "missing google service account key" });
     return stats;
   }
   const running = await supabaseAdmin<{ started_at: string }[]>(

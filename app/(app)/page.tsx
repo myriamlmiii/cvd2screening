@@ -1,13 +1,9 @@
-import { OverviewDashboard } from "@/components/pages/OverviewDashboard";
-import { getOverviewPayload } from "@/lib/startups/dashboard";
+import { SituationHome } from "@/components/erp/SituationHome";
+import { getSituationPayload } from "@/lib/erp/payloads";
 
 export const dynamic = "force-dynamic";
 
-export default async function OverviewPage() {
-  const initial = await getOverviewPayload({ status: "all", sector: "all", origin: "all" });
-  return (
-    <div className="animate-fade-in">
-      <OverviewDashboard initial={initial} />
-    </div>
-  );
+export default async function SituationPage() {
+  const data = await getSituationPayload();
+  return <SituationHome data={data} />;
 }

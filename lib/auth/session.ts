@@ -13,6 +13,29 @@ export function demoEmail() {
   return (process.env.DEMO_EMAIL || "investors123@gmail.com").trim().toLowerCase();
 }
 
+/** Comma-separated CRM logins plus the three seeded teammates and DEMO_EMAIL. */
+export function allowedEmails(): string[] {
+  const fromList = (process.env.ALLOWED_EMAILS || "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  const extras = [
+    demoEmail(),
+    "lmeriem28@gmail.com",
+    "dlaraki@u-investors.com",
+    "j.lobe@u-investors.com",
+    process.env.TEAM_DRISS_EMAIL,
+    process.env.TEAM_JONATHAN_EMAIL,
+  ]
+    .map((s) => (s || "").trim().toLowerCase())
+    .filter(Boolean);
+  return [...new Set([...fromList, ...extras])];
+}
+
+export function emailAllowed(email: string) {
+  return allowedEmails().includes(email.trim().toLowerCase());
+}
+
 export function demoPassword() {
   return process.env.DEMO_PASSWORD || "1234@5";
 }
@@ -78,7 +101,7 @@ export async function readSessionToken(token: string | undefined | null): Promis
 }
 
 export function credentialsMatch(email: string, password: string) {
-  const okEmail = email.trim().toLowerCase() === demoEmail();
+  const okEmail = emailAllowed(email);
   const okPass = timingEqual(password, demoPassword());
   return okEmail && okPass;
 }

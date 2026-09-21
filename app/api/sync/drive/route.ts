@@ -1,18 +1,22 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { currentRole } from "@/lib/auth/role";
 import { ingestGoogleDrive, driveFolderIds } from "@/lib/services/drive-ingest";
 import { getDriveConnectorHealth } from "@/lib/services/drive-health";
 import { logOp } from "@/lib/log";
+import { readSessionToken, sessionCookieName } from "@/lib/auth/session";
 
 function isCron(req: Request): boolean {
   return Boolean(process.env.CRON_SECRET && req.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`);
 }
 
-function authorized(req: Request): boolean {
+async function authorized(req: Request): Promise<boolean> {
   if (isCron(req)) return true;
   const secret = process.env.INTAKE_WEBHOOK_SECRET || process.env.SYNC_WEBHOOK_SECRET || process.env.CRON_SECRET;
   if (secret && req.headers.get("x-intake-secret") === secret) return true;
   if (currentRole() === "Admin") return true;
+  const session = await readSessionToken(cookies().get(sessionCookieName())?.value);
+  if (session) return true;
   return !secret && process.env.NODE_ENV !== "production";
 }
 
@@ -26,7 +30,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const shouldRun = url.searchParams.get("run") === "1" || isCron(req);
   if (shouldRun) {
-    if (!authorized(req)) {
+    if (!(await authorized(req))) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
     try {
@@ -43,7 +47,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!authorized(req)) {
+  if (!(await authorized(req))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
   if (!driveFolderIds().length) {

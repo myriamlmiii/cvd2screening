@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { canMutate } from "@/lib/auth/role";
 import { supabaseAdmin } from "@/lib/services/supabase-rest";
+import { findUserByEmail } from "@/lib/auth/users";
+import { readSessionToken, sessionCookieName } from "@/lib/auth/session";
 import type { HumanDecision } from "@/types";
 
 const itemSchema = z.object({
@@ -14,8 +17,6 @@ const itemSchema = z.object({
 });
 const bodySchema = z.object({ items: z.array(itemSchema).min(1).max(50) });
 
-type Item = z.infer<typeof itemSchema>;
-
 const HUMAN: Record<string, HumanDecision> = {
   Invest: "Invest",
   Advance: "Invest",
@@ -24,24 +25,53 @@ const HUMAN: Record<string, HumanDecision> = {
   Pass: "Pass",
 };
 
-const GP: Record<HumanDecision, "Advance" | "Hold" | "Pass"> = {
-  Invest: "Advance",
-  Watch: "Hold",
-  Pass: "Pass",
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+type LogRow = {
+  id: string;
+  deal_id: string;
+  decision: string;
+  decided_by: string | null;
+  decided_by_user_id: string | null;
+  note: string | null;
+  created_at: string;
 };
 
-function idList(ids: string[]) {
-  return ids.map((id) => `"${id.replace(/"/g, "")}"`).join(",");
+function toEvent(row: LogRow) {
+  return {
+    id: row.id,
+    deal_id: row.deal_id,
+    startup_id: row.deal_id,
+    decision: row.decision,
+    actor: row.decided_by,
+    decided_by: row.decided_by,
+    decided_by_user_id: row.decided_by_user_id,
+    rationale: row.note,
+    note: row.note,
+    created_at: row.created_at,
+  };
+}
+
+async function resolveDealId(raw: string): Promise<string | null> {
+  const id = raw.trim();
+  if (!id) return null;
+  if (UUID.test(id)) return id;
+  const byAirtable = await supabaseAdmin<{ id: string }[]>(
+    `screened_deals?airtable_record_id=eq.${encodeURIComponent(id)}&select=id&limit=1`,
+  );
+  return byAirtable.ok ? byAirtable.data?.[0]?.id ?? null : null;
 }
 
 export async function GET(req: Request) {
-  const startupId = new URL(req.url).searchParams.get("startupId");
-  if (!startupId) return NextResponse.json({ error: "startupId required" }, { status: 400 });
-  const result = await supabaseAdmin<{ id: string; decision: string; actor: string | null; rationale: string | null; created_at: string }[]>(
-    `decision_events?startup_id=eq.${encodeURIComponent(startupId)}&order=created_at.desc&select=*`,
+  const raw = new URL(req.url).searchParams.get("startupId") || new URL(req.url).searchParams.get("dealId");
+  if (!raw) return NextResponse.json({ error: "startupId required" }, { status: 400 });
+  const dealId = await resolveDealId(raw);
+  if (!dealId) return NextResponse.json({ events: [] });
+  const result = await supabaseAdmin<LogRow[]>(
+    `decision_log?deal_id=eq.${encodeURIComponent(dealId)}&order=created_at.desc&select=*`,
   );
   if (!result.ok) return NextResponse.json({ events: [], error: result.error }, { status: result.status === 503 ? 503 : 200 });
-  return NextResponse.json({ events: result.data ?? [] });
+  return NextResponse.json({ events: (result.data ?? []).map(toEvent) });
 }
 
 export async function POST(req: Request) {
@@ -52,81 +82,60 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Expected { items: { id, gpDecision }[] }" }, { status: 400 });
   }
-  const items = parsed.data.items;
 
-  const mapped = items.map((i) => {
+  const mapped = parsed.data.items.map((i) => {
     const human = HUMAN[i.gpDecision];
     if (!human) return null;
-    return { ...i, human, gp: GP[human] };
+    return { ...i, human };
   });
   if (mapped.some((m) => !m)) {
     return NextResponse.json({ error: "Decision must be Invest, Watch, or Pass." }, { status: 400 });
   }
   const rows = mapped as NonNullable<(typeof mapped)[number]>[];
 
-  const ids = rows.map((r) => r.id);
-  const current = await supabaseAdmin<{ source_record_id: string; gp_decision: string }[]>(
-    `scored_deals?source_record_id=in.(${idList(ids)})&select=source_record_id,gp_decision`,
-  );
-  const previous = (current.data ?? []).map((r) => ({ id: r.source_record_id, gpDecision: r.gp_decision }));
+  const session = await readSessionToken(cookies().get(sessionCookieName())?.value);
+  const user = session?.email ? await findUserByEmail(session.email) : null;
+  const sessionEmail = session?.email || null;
 
-  const events = rows.map((r) => ({
-    startup_id: r.id,
-    decision: r.human,
-    actor: r.actor || "gp",
-    rationale: r.rationale || null,
-    tags: r.tags ?? [],
-    ai_recommendation: r.aiRecommendation ?? null,
-  }));
-  const inserted = await supabaseAdmin("decision_events", {
-    method: "POST",
-    body: JSON.stringify(events),
-    prefer: "return=minimal",
-  });
-  if (!inserted.ok && inserted.status !== 404) {
-    const fallback = await supabaseAdmin("decision_events", {
-      method: "POST",
-      body: JSON.stringify(events.map(({ tags: _t, ai_recommendation: _a, ...rest }) => rest)),
-      prefer: "return=minimal",
-    });
-    if (!fallback.ok && fallback.status !== 404) {
+  const events: {
+    deal_id: string;
+    decision: HumanDecision;
+    decided_by: string | null;
+    decided_by_user_id: string | null;
+    note: string | null;
+  }[] = [];
+  for (const r of rows) {
+    const dealId = await resolveDealId(r.id);
+    if (!dealId) {
       return NextResponse.json(
-        { error: inserted.error || "Could not append decision event. Re-run supabase/schema.sql." },
-        { status: inserted.status === 503 ? 503 : 502 },
+        { error: `No screened_deals row for ${r.id}. decision_log.deal_id is a uuid.` },
+        { status: 400 },
       );
     }
-  }
-
-  const byDecision = new Map<string, string[]>();
-  for (const r of rows) {
-    const list = byDecision.get(r.gp) ?? [];
-    list.push(r.id);
-    byDecision.set(r.gp, list);
-  }
-  for (const [gpDecision, targetIds] of byDecision) {
-    const patch = await supabaseAdmin(`scored_deals?source_record_id=in.(${idList(targetIds)})`, {
-      method: "PATCH",
-      body: JSON.stringify({ gp_decision: gpDecision }),
-    });
-    if (!patch.ok && patch.status !== 404 && patch.status !== 400) {
-      return NextResponse.json({ error: patch.error || "Could not update current decision pointer." }, { status: 502 });
-    }
-  }
-
-  for (const r of rows) {
-    const crm =
-      r.human === "Pass" ? "Passed" : r.human === "Invest" ? "Shortlisted" : "Review";
-    await supabaseAdmin(`startups?id=eq.${encodeURIComponent(r.id)}`, {
-      method: "PATCH",
-      body: JSON.stringify({ crm_status: crm, updated_at: new Date().toISOString() }),
+    events.push({
+      deal_id: dealId,
+      decision: r.human,
+      decided_by: user?.email || sessionEmail || r.actor || null,
+      decided_by_user_id: user?.id ?? null,
+      note: r.rationale || null,
     });
   }
 
-  await supabaseAdmin("startup_activity", {
+  const inserted = await supabaseAdmin<LogRow[]>("decision_log", {
     method: "POST",
-    body: JSON.stringify(rows.map((r) => ({ startup_id: r.id, kind: "decision", detail: r.human }))),
-    prefer: "return=minimal",
+    body: JSON.stringify(events),
+    prefer: "return=representation",
   });
+  if (!inserted.ok) {
+    return NextResponse.json(
+      { error: inserted.error || "Could not append decision_log row." },
+      { status: inserted.status === 503 ? 503 : 502 },
+    );
+  }
 
-  return NextResponse.json({ previous, recorded: rows.map((r) => ({ id: r.id, decision: r.human })) });
+  return NextResponse.json({
+    previous: [],
+    recorded: rows.map((r, i) => ({ id: r.id, deal_id: events[i].deal_id, decision: r.human })),
+    rows: inserted.data ?? [],
+  });
 }

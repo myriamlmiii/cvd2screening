@@ -13,9 +13,9 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="mt-6 inline-flex h-9 items-center rounded bg-cvd px-4 text-body-sm font-medium text-white hover:bg-[#1d4c42]"
+          className="mt-6 inline-flex h-9 items-center rounded-lg bg-cvd px-4 text-body-sm font-medium text-white"
         >
-          Overview
+          Situation
         </Link>
       </div>
     </div>

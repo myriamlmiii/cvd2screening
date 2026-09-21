@@ -26,7 +26,7 @@ export function deal(partial: Partial<ScoredDeal> & { name: string }): ScoredDea
     email: null,
     whatsapp: null,
     ndaUrl: null,
-    termSheetUrl: null,
+    termSheetUrl: partial.termSheetUrl ?? null,
     dossierUrl: null,
     source: partial.source ?? null,
     score: partial.score ?? null,

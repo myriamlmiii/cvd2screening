@@ -87,7 +87,7 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-in": "fade-in 180ms ease-out both",
+        "fade-in": "fade-in 220ms ease-out both",
         "drawer-in": "drawer-in 200ms cubic-bezier(0.32, 0.72, 0, 1) both",
       },
     },

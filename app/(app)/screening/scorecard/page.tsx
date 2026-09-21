@@ -1,4 +1,4 @@
-import ReviewPage from "../../review/page";
-
-export const dynamic = "force-dynamic";
-export default ReviewPage;
+import { redirect } from "next/navigation";
+export default function ScreeningRedirect() {
+  redirect("/");
+}

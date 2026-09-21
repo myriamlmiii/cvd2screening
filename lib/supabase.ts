@@ -89,11 +89,14 @@ export const getScores = cache(async (): Promise<Map<string, DealScore>> => {
       }
       const rows = (await res.json()) as Record<string, unknown>[];
       for (const raw of rows) {
-        const id = String(raw.source_record_id || raw.deal_id || raw.startup_id || "");
-        if (!id) continue;
-        map.set(id, scoreFromUnknown(raw, id));
+        const id = String(raw.source_record_id || raw.airtable_record_id || raw.deal_id || raw.startup_id || "");
+        const uuid = String(raw.id || "");
+        const score = scoreFromUnknown(raw, id || uuid);
+        if (score.cvdScore === 0) score.cvdScore = null;
+        if (id) map.set(id, score);
+        if (uuid && uuid !== id) map.set(uuid, score);
       }
-      if (map.size) break;
+      if ([...map.values()].some((s) => s.cvdScore != null)) break;
     } catch {
       /* try next table */
     }
@@ -144,7 +147,7 @@ function scoreFromUnknown(row: Record<string, unknown>, id: string): DealScore {
     gp_decision: (row.gp_decision as DealScore["gpDecision"]) || "Pending",
     qualified: Boolean(row.qualified),
     rejection_reason: (row.rejection_reason as string) || null,
-    cvd_score: num(row.cvd_score ?? row.score ?? row.overall_score),
+    cvd_score: firstPositive(row.cvd_score, row.score_overall, row.score, row.overall_score),
     recommendation: (row.recommendation as DealScore["recommendation"]) ?? null,
     assessment: (row.assessment as string) || (row.summary as string) || null,
     axes: (row.axes as DealScore["axes"]) || [],
@@ -161,6 +164,14 @@ function scoreFromUnknown(row: Record<string, unknown>, id: string): DealScore {
     ai_recommendation: (row.ai_recommendation as DealScore["aiRecommendation"]) || (row.result as DealScore["aiRecommendation"]) || null,
     data_completeness: num(row.data_completeness),
   });
+}
+
+function firstPositive(...vals: unknown[]): number | null {
+  for (const v of vals) {
+    const n = num(v);
+    if (n != null && n > 0) return n;
+  }
+  return null;
 }
 
 function num(v: unknown): number | null {

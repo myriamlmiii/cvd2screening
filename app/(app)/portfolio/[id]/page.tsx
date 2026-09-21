@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { CompanyFiche } from "@/components/erp/CompanyFiche";
+import { getFichePayload } from "@/lib/erp/payloads";
 
-export default function PortfolioCompany({ params }: { params: { id: string } }) {
-  redirect(`/review?id=${encodeURIComponent(params.id)}`);
+export const dynamic = "force-dynamic";
+
+export default async function PortfolioFiche({ params }: { params: { id: string } }) {
+  const data = await getFichePayload(params.id);
+  if (!data) notFound();
+  return <CompanyFiche data={data} backHref="/portfolio" backLabel="Portefeuille" />;
 }

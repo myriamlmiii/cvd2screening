@@ -12,6 +12,8 @@ export function slimDeal(deal: ScoredDeal) {
     founder: deal.founder,
     dateEntered: deal.dateEntered,
     dateUpdated: deal.dateUpdated,
+    pitchUrl: deal.pitchUrl,
+    valuation: deal.valuation,
     websiteUrl: deal.websiteUrl,
     description: deal.description ? deal.description.slice(0, 280) : null,
     score: deal.score

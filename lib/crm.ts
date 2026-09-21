@@ -29,6 +29,7 @@ export function awaitingReview(deal: ScoredDeal): boolean {
 }
 
 export function aiRecommendation(deal: ScoredDeal): AiRecommendation {
+  if (isClosedLost(deal)) return "Lower Priority";
   if (deal.score?.aiRecommendation) return deal.score.aiRecommendation;
   const rec = deal.score?.recommendation;
   if (rec === "Advance") return "Strong Fit";
@@ -116,19 +117,45 @@ export function attentionReasons(deal: ScoredDeal): string[] {
   return reasons.slice(0, 4);
 }
 
+export function isClosedLost(deal: ScoredDeal): boolean {
+  if (crmStatus(deal) === "Passed") return true;
+  const st = (deal.status || "").toLowerCase();
+  if (st.includes("déclin") || st.includes("declin")) return true;
+  const update = (deal.update || "").toLowerCase();
+  return update.includes("non conforme") || update.includes("hors thèse") || update.includes("out of scope");
+}
+
+function liveStageRank(deal: ScoredDeal): number {
+  if (deal.termSheetUrl) return 0;
+  const s = crmStatus(deal);
+  if (s === "Selected") return 8;
+  if (s === "Passed") return 9;
+  if (s === "Shortlisted") return 1;
+  if (s === "Reviewing") return 2;
+  return 3;
+}
+
 export function prioritize(deals: ScoredDeal[]): ScoredDeal[] {
-  const rank: Record<AiRecommendation, number> = {
+  const recRank: Record<AiRecommendation, number> = {
     "Strong Fit": 0,
     Review: 1,
     "Needs Information": 2,
     Watch: 3,
     "Lower Priority": 4,
   };
-  return [...deals].sort((a, b) => {
-    const rec = rank[aiRecommendation(a)] - rank[aiRecommendation(b)];
-    if (rec !== 0) return rec;
-    return (displayScore(b) ?? -1) - (displayScore(a) ?? -1);
-  });
+  return [...deals]
+    .filter((d) => !isClosedLost(d))
+    .sort((a, b) => {
+      const stage = liveStageRank(a) - liveStageRank(b);
+      if (stage !== 0) return stage;
+      const rec = recRank[aiRecommendation(a)] - recRank[aiRecommendation(b)];
+      if (rec !== 0) return rec;
+      const score = (displayScore(b) ?? -1) - (displayScore(a) ?? -1);
+      if (score !== 0) return score;
+      const ta = Date.parse(a.dateUpdated || a.dateEntered || "") || 0;
+      const tb = Date.parse(b.dateUpdated || b.dateEntered || "") || 0;
+      return tb - ta;
+    });
 }
 
 export function duplicateKey(name: string, website?: string | null): string {

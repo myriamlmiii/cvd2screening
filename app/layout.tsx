@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 import { THEME_INIT_SCRIPT } from "@/components/shell/ThemeToggle";
+import { LocaleProvider } from "@/lib/i18n";
+import { AppToaster } from "@/components/ui/Toaster";
 import "./globals.css";
 
 const sans = Inter({
@@ -36,7 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="fr"
       className={`${sans.variable} ${mono.variable} ${heading.variable}`}
       suppressHydrationWarning
     >
@@ -50,7 +52,12 @@ export default function RootLayout({
         />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="font-sans text-body antialiased">{children}</body>
+      <body className="font-sans text-body antialiased">
+        <LocaleProvider>
+          {children}
+          <AppToaster />
+        </LocaleProvider>
+      </body>
     </html>
   );
 }

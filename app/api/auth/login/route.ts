@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { credentialsMatch, createSessionToken, demoEmail, sessionCookieName, sessionMaxAge } from "@/lib/auth/session";
+import { credentialsMatch, createSessionToken, sessionCookieName, sessionMaxAge } from "@/lib/auth/session";
 
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as { email?: string; password?: string } | null;
@@ -8,8 +8,9 @@ export async function POST(req: Request) {
   if (!credentialsMatch(email, password)) {
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
   }
-  const token = await createSessionToken(demoEmail());
-  const res = NextResponse.json({ ok: true, email: demoEmail() });
+  const normalized = email.trim().toLowerCase();
+  const token = await createSessionToken(normalized);
+  const res = NextResponse.json({ ok: true, email: normalized });
   res.cookies.set(sessionCookieName(), token, {
     httpOnly: true,
     sameSite: "lax",

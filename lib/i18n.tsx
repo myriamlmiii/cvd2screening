@@ -9,11 +9,11 @@ const LocaleContext = createContext<{
   locale: Locale;
   setLocale: (l: Locale) => void;
   toggle: () => void;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
 } | null>(null);
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>("fr");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -33,7 +33,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     setLocale(locale === "en" ? "fr" : "en");
   }, [locale, setLocale]);
 
-  const t = useCallback((key: string) => translate(locale, key), [locale]);
+  const t = useCallback((key: string, vars?: Record<string, string | number>) => translate(locale, key, vars), [locale]);
 
   const value = useMemo(() => ({ locale, setLocale, toggle, t }), [locale, setLocale, toggle, t]);
 

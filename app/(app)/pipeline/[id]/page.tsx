@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { CompanyFiche } from "@/components/erp/CompanyFiche";
+import { getFichePayload } from "@/lib/erp/payloads";
 
-export default function PipelineCompany({ params }: { params: { id: string } }) {
-  redirect(`/review?id=${encodeURIComponent(params.id)}`);
+export const dynamic = "force-dynamic";
+
+export default async function PipelineFiche({ params }: { params: { id: string } }) {
+  const data = await getFichePayload(params.id);
+  if (!data) notFound();
+  return <CompanyFiche data={data} backHref="/" backLabel="Situation" />;
 }

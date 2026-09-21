@@ -3,6 +3,7 @@ import { z } from "zod";
 import { completeMemo } from "@/lib/ai/provider";
 import { screeningHash } from "@/lib/ai/hash";
 import { logOp } from "@/lib/log";
+import { clientKey, limitAiCalls } from "@/lib/rate-limit";
 
 const bodySchema = z.object({
   name: z.string().min(1),
@@ -22,6 +23,10 @@ const bodySchema = z.object({
 const memoCache = new Map<string, { hash: string; memo: unknown }>();
 
 export async function POST(req: Request) {
+  const limited = await limitAiCalls(`memo:${clientKey(req)}`);
+  if (!limited.success) {
+    return NextResponse.json({ error: "Trop de requêtes IA. Réessayez plus tard." }, { status: 429 });
+  }
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Expected a company payload with name." }, { status: 400 });

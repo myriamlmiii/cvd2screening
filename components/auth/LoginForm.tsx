@@ -2,15 +2,15 @@
 
 import { useId, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UInvestorsLogo, SceneBackground } from "@/components/brand/UInvestorsLogo";
-
-const fieldClass =
-  "mt-2 h-11 w-full rounded-md border border-white/10 bg-[#272e26] px-3 text-[13px] text-[#ecece8] outline-none transition-colors focus:border-[#c4a57a] focus:shadow-[0_0_0_3px_rgba(196,165,122,0.18)] disabled:opacity-50";
-const labelClass = "block text-[11px] font-semibold uppercase tracking-[0.08em] text-[#9aa094]";
+import { BarChart3 } from "lucide-react";
+import { toast } from "@/components/ui/Toaster";
+import { useLocale } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 
 export function LoginForm() {
   const router = useRouter();
   const search = useSearchParams();
+  const { t, locale, setLocale } = useLocale();
   const errorId = useId();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,64 +28,48 @@ export function LoginForm() {
     });
     setBusy(false);
     if (!res.ok) {
-      setError("Those credentials were not accepted.");
+      setError(t("login.bad"));
+      toast.error(t("login.bad"));
       return;
     }
+    toast.success(t("login.ok"));
     router.replace(search.get("next") || "/");
     router.refresh();
   };
 
   return (
-    <div className="login-screen dark animate-fade-in relative isolate flex min-h-screen items-center justify-center px-5 text-[#ecece8]">
-      <SceneBackground />
-      <div className="relative z-10 flex w-full max-w-[380px] flex-col items-center">
-        <UInvestorsLogo size="hero" />
-
-        <div className="mt-8 w-full rounded-xl border border-white/10 bg-[#1a1f19] shadow-[0_32px_90px_-16px_rgba(0,0,0,0.6)]">
-          <form onSubmit={submit} aria-busy={busy} className="p-7">
-            <label className={labelClass}>
-              Email
-              <input
-                type="email"
-                autoComplete="username"
-                autoFocus
-                required
-                disabled={busy}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={fieldClass}
-              />
-            </label>
-
-            <label className={`mt-4 ${labelClass}`}>
-              Password
-              <input
-                type="password"
-                autoComplete="current-password"
-                required
-                disabled={busy}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={fieldClass}
-              />
-            </label>
-
-            {error ? (
-              <p id={errorId} role="alert" className="mt-3 text-[12px] text-[#e08a7a]">
-                {error}
-              </p>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={busy}
-              aria-describedby={error ? errorId : undefined}
-              className="mt-6 h-11 w-full rounded-md bg-[#c4a57a] text-[13px] font-semibold tracking-wide text-[#1a1c18] transition-transform duration-150 ease-out active:scale-[0.98] disabled:opacity-60"
-            >
-              {busy ? "Signing in…" : "Sign in"}
+    <div className="flex min-h-screen w-full items-center justify-center bg-canvas px-5">
+      <div className="w-full max-w-[400px] animate-fade-in">
+        <div className="mb-6 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-6 w-6 text-[#1B2B44]" />
+            <div className="text-[18px] font-bold text-[#1B2B44]">U-investors</div>
+          </div>
+          <div className="flex rounded-lg border border-line bg-white text-[11px] font-semibold">
+            <button type="button" onClick={() => setLocale("fr")} className={cn("px-2 py-1", locale === "fr" ? "bg-[#2563EB] text-white" : "text-ink-3")}>
+              FR
             </button>
-          </form>
+            <button type="button" onClick={() => setLocale("en")} className={cn("px-2 py-1", locale === "en" ? "bg-[#2563EB] text-white" : "text-ink-3")}>
+              EN
+            </button>
+          </div>
         </div>
+        <form onSubmit={submit} className="erp-card p-6">
+          <h1 className="text-[18px] font-bold">{t("login.title")}</h1>
+          <p className="mt-1 text-[12px] text-ink-3">{t("login.subtitle")}</p>
+          <label className="mt-4 block text-[12px] font-medium text-ink-2">
+            {t("login.email")}
+            <input type="email" autoComplete="username" autoFocus required disabled={busy} value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 h-11 w-full rounded-lg border border-line bg-white px-3 text-[13px] outline-none focus:ring-2 focus:ring-[#2563EB]/30" />
+          </label>
+          <label className="mt-3 block text-[12px] font-medium text-ink-2">
+            {t("login.password")}
+            <input type="password" autoComplete="current-password" required disabled={busy} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 h-11 w-full rounded-lg border border-line bg-white px-3 text-[13px] outline-none focus:ring-2 focus:ring-[#2563EB]/30" />
+          </label>
+          {error ? <p id={errorId} role="alert" className="mt-3 text-[12px] text-[#DC2626]">{error}</p> : null}
+          <button type="submit" disabled={busy} className="mt-5 h-11 w-full rounded-lg bg-[#2563EB] text-[14px] font-medium text-white hover:bg-[#1d4ed8] disabled:opacity-60">
+            {busy ? t("login.entering") : t("login.enter")}
+          </button>
+        </form>
       </div>
     </div>
   );

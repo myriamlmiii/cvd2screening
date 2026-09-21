@@ -1,28 +1,32 @@
 "use client";
 
-import { Sidebar } from "@/components/shell/Sidebar";
-import { TopBar } from "@/components/shell/TopBar";
-import { DriveHealthBanner } from "@/components/shell/DriveHealthBanner";
+import { ErpSidebar } from "@/components/erp/Sidebar";
+import { ErpHeader } from "@/components/erp/Header";
 import { CommandPalette } from "@/components/CommandPalette";
-import { RouteSkin } from "@/components/shell/RouteSkin";
-import { LocaleProvider } from "@/lib/i18n";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { DriveHealthBanner } from "@/components/shell/DriveHealthBanner";
+import type { SituationPayload } from "@/lib/erp/payloads";
 
-export function AppChrome({ children }: { children: React.ReactNode }) {
+export function AppChrome({
+  children,
+  taskCount,
+  notifications,
+}: {
+  children: React.ReactNode;
+  taskCount: number;
+  notifications: SituationPayload["notifications"];
+}) {
   return (
-    <LocaleProvider>
-      <QueryProvider>
+    <QueryProvider>
         <div className="min-h-screen bg-canvas">
-          <RouteSkin />
-          <Sidebar />
-          <div className="md:pl-[168px]">
-            <TopBar />
+          <ErpSidebar taskCount={taskCount} />
+          <div className="md:pl-[230px]">
+            <ErpHeader notifications={notifications} />
             <DriveHealthBanner />
-            <main className="px-3 py-2 md:px-3">{children}</main>
+            <main className="px-4 py-5 md:px-6 md:py-6">{children}</main>
           </div>
           <CommandPalette />
         </div>
-      </QueryProvider>
-    </LocaleProvider>
+    </QueryProvider>
   );
 }

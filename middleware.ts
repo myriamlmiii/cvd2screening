@@ -13,7 +13,6 @@ export async function middleware(req: NextRequest) {
   if (!authIsRequired()) return NextResponse.next();
   const { pathname } = req.nextUrl;
   if (isOpen(pathname)) return NextResponse.next();
-  if (req.headers.get("authorization")?.startsWith("Bearer ")) return NextResponse.next();
 
   const session = await readSessionToken(req.cookies.get(sessionCookieName())?.value);
   if (session) return NextResponse.next();

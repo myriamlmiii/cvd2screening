@@ -1,17 +1,21 @@
-import { DashCard } from "@/components/ui/Dash";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { supabaseAnon } from "@/lib/services/supabase-rest";
 import { isServiceAccountConfigured } from "@/lib/google/service-account";
 import { driveFolderIds } from "@/lib/services/drive-ingest";
+import { PageHeader } from "@/components/erp/ui";
+import { DriveSyncButton } from "@/components/erp/DriveSyncButton";
+import { THESIS, THESIS_VERSION } from "@/lib/thesis";
+import { demoEmail } from "@/lib/auth/session";
+import { T, ActiveChip } from "@/components/erp/T";
 
 export const dynamic = "force-dynamic";
 
 const MODULES = [
-  { name: "Application Intake", env: "INTAKE_WEBHOOK_SECRET", note: "n8n → POST /api/webhooks/intake" },
-  { name: "Airtable Synchronization", env: "AIRTABLE_TOKEN", note: "Live PIPELINE + POST /api/sync/airtable" },
-  { name: "AI Screening", env: "GROQ_API_KEY", note: "Groq — memos and Python screening" },
-  { name: "Decision log", env: "SUPABASE_SERVICE_ROLE_KEY", note: "Immutable decision_events" },
-  { name: "Google Drive", env: "GOOGLE_DRIVE_FOLDER_IDS", note: "Standing ingest · POST /api/sync/drive" },
+  { nameKey: "erp.setModIntake", env: "INTAKE_WEBHOOK_SECRET", note: "n8n → POST /api/webhooks/intake" },
+  { nameKey: "erp.setModAirtable", env: "AIRTABLE_TOKEN", note: "PIPELINE live + POST /api/sync/airtable" },
+  { nameKey: "erp.setModAi", env: "GROQ_API_KEY", note: "Groq — mémos et scoring" },
+  { nameKey: "erp.setModLog", env: "SUPABASE_SERVICE_ROLE_KEY", note: "decision_log" },
+  { nameKey: "erp.setModDrive", env: "GOOGLE_DRIVE_FOLDER_IDS", note: "Ingest · POST /api/sync/drive" },
 ] as const;
 
 export default async function SettingsPage() {
@@ -66,73 +70,92 @@ export default async function SettingsPage() {
         >("sync_runs?select=id,source,started_at,completed_at,status,records_seen,records_created,records_updated,records_skipped,records_failed,error_summary&order=started_at.desc&limit=8");
 
   return (
-    <div className="text-ink">
-      <h1 className="mb-2 font-sans text-[14px] font-semibold md:text-[15px]">Automations</h1>
-      <DashCard className="mb-3">
-        <div className="text-[12px] font-semibold">Access</div>
-        <p className="mt-1 text-[11px] text-ink-2">
-          The CRM opens on a sign-in page. Preview account: investors123@gmail.com / 1234@5. This is demo access for supervisors, not production identity. Snapshot deal data still loads if Airtable or Drive is down.
+    <div className="animate-fade-in space-y-4">
+      <PageHeader title={<T k="erp.setTitle" />} subtitle={<T k="erp.setSubtitle" />} />
+      <div className="erp-card p-4">
+        <div className="text-[13px] font-semibold"><T k="erp.setTeam" /></div>
+        <p className="mt-1 text-[13px] text-ink-2">
+          <T k="erp.setTeamBody" />
         </p>
-      </DashCard>
-      <p className="mb-3 max-w-2xl text-[11px] text-ink-2">
-        Orchestration stays in n8n. Scoring, qualification, and decisions stay in this app. Status below is configuration, not a live ping of every vendor.
-      </p>
-      <div className="grid gap-2 md:grid-cols-2">
+        <ul className="mt-3 text-[13px]">
+          <li>
+            <span className="font-semibold">Driss</span> · Managing Director · <T k="erp.setDemoEmail" vars={{ email: demoEmail() }} />
+          </li>
+        </ul>
+      </div>
+      <div className="erp-card p-4 space-y-3">
+        <div className="text-[13px] font-semibold"><T k="erp.setDrive" /></div>
+        <p className="text-[13px] text-ink-2">
+          {isServiceAccountConfigured() ? <T k="erp.setDriveOk" /> : <T k="erp.setDriveEmpty" />}
+        </p>
+        <DriveSyncButton />
+      </div>
+      <div className="erp-card p-4">
+        <div className="text-[13px] font-semibold"><T k="erp.setThesis" vars={{ v: THESIS_VERSION }} /></div>
+        <p className="mt-1 text-[13px] text-ink-2"><T k="erp.setSectors" vars={{ list: THESIS.coreSectors.join(", ") }} /></p>
+        <p className="text-[13px] text-ink-2"><T k="erp.setGeos" vars={{ list: THESIS.geographyPriority.join(", ") }} /></p>
+      </div>
+      <div className="erp-card p-4">
+        <div className="text-[13px] font-semibold"><T k="erp.setAccess" /></div>
+        <p className="mt-1 text-[13px] text-ink-2">
+          <T k="erp.setAccessBody" />
+        </p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
         {MODULES.map((m) => {
           const active = on[m.env];
-          const label = active ? "Active" : "Disabled";
           return (
-            <DashCard key={m.name}>
+            <div key={m.nameKey} className="erp-card p-4">
               <div className="flex items-center justify-between gap-2">
-                <div className="text-[12px] font-semibold">{m.name}</div>
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-3">{label}</span>
+                <div className="text-[13px] font-semibold"><T k={m.nameKey} /></div>
+                <ActiveChip on={Boolean(active)} />
               </div>
-              <p className="mt-1 text-[11px] text-ink-2">{m.note}</p>
-            </DashCard>
+              <p className="mt-1 text-[12px] text-ink-3">{m.note}</p>
+            </div>
           );
         })}
       </div>
 
-      <h2 className="mb-2 mt-4 text-[12px] font-semibold">Drive agent log</h2>
-      <DashCard padded={false}>
+      <section className="erp-card overflow-hidden">
+        <div className="px-5 py-4 text-[15px] font-semibold"><T k="erp.setLog" /></div>
         {!runs.ok || !runs.data?.length ? (
-          <p className="px-3 py-4 text-[11px] text-ink-3">No Drive sync runs recorded yet. Once the Drive folder is shared with the service account, trigger a run: POST /api/sync/drive.</p>
+          <p className="px-5 py-8 text-center text-[13px] text-ink-3"><T k="erp.setNoRuns" /></p>
         ) : (
-          <table className="w-full text-left text-[11px]">
-            <thead className="text-[10px] uppercase text-ink-3">
+          <table className="erp-table w-full">
+            <thead>
               <tr>
-                <th className="px-2.5 py-2">When</th>
-                <th className="px-2.5 py-2">Status</th>
-                <th className="px-2.5 py-2">Seen</th>
-                <th className="px-2.5 py-2">New</th>
-                <th className="px-2.5 py-2">Updated</th>
-                <th className="px-2.5 py-2">Groq / keyword</th>
-                <th className="px-2.5 py-2">Stage Δ</th>
+                <th><T k="erp.setWhen" /></th>
+                <th><T k="erp.status" /></th>
+                <th><T k="erp.setSeen" /></th>
+                <th><T k="erp.setNew" /></th>
+                <th><T k="erp.setUpdated" /></th>
+                <th><T k="erp.setGroq" /></th>
+                <th><T k="erp.setStageDelta" /></th>
               </tr>
             </thead>
             <tbody>
               {runs.data.map((run) => {
                 const details = run.details ?? {};
                 return (
-                  <tr key={run.id} className="border-t border-line">
-                    <td className="px-2.5 py-1.5 font-mono text-[10px]">{run.started_at.replace("T", " ").slice(0, 16)}</td>
-                    <td className="px-2.5 py-1.5">{run.status}</td>
-                    <td className="px-2.5 py-1.5">{run.records_seen}</td>
-                    <td className="px-2.5 py-1.5">{run.records_created}</td>
-                    <td className="px-2.5 py-1.5">{run.records_updated}</td>
-                    <td className="px-2.5 py-1.5">
+                  <tr key={run.id}>
+                    <td className="font-mono text-[11px]">{run.started_at.replace("T", " ").slice(0, 16)}</td>
+                    <td>{run.status}</td>
+                    <td>{run.records_seen}</td>
+                    <td>{run.records_created}</td>
+                    <td>{run.records_updated}</td>
+                    <td>
                       {String(details.groq_classified ?? "—")} / {String(details.keyword_classified ?? "—")}
                     </td>
-                    <td className="px-2.5 py-1.5">{String(details.stage_changes ?? "—")}</td>
+                    <td>{String(details.stage_changes ?? "—")}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         )}
-      </DashCard>
-      <p className="mt-3 text-[10px] text-ink-3">
-        Supabase scores: {isSupabaseConfigured() ? "configured" : "not configured — CRM still reads Airtable"}.
+      </section>
+      <p className="text-[12px] text-ink-3">
+        <T k={isSupabaseConfigured() ? "erp.setScoresOn" : "erp.setScoresOff"} />
       </p>
     </div>
   );

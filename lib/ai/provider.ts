@@ -38,6 +38,12 @@ export function getAIProvider(): AIProvider | null {
   return new GroqProvider(key);
 }
 
+export async function completeText(messages: ChatMessage[]): Promise<string | null> {
+  const provider = getAIProvider();
+  if (!provider) return null;
+  return provider.complete(messages);
+}
+
 export async function completeMemo(messages: ChatMessage[]): Promise<AiMemo | null> {
   const provider = getAIProvider();
   if (!provider) return null;

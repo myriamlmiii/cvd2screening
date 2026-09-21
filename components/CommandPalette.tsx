@@ -80,12 +80,15 @@ export function CommandPalette() {
 
   const items = useMemo<Item[]>(() => {
     const nav: Item[] = [
-      { id: "overview", label: t("nav.overview"), group: "nav", icon: LayoutGrid, run: () => router.push("/") },
-      { id: "review", label: t("nav.pipeline"), group: "nav", icon: GitBranch, run: () => router.push("/review") },
-      { id: "analytics", label: t("nav.portfolio"), group: "nav", icon: Briefcase, run: () => router.push("/analytics") },
-      { id: "workflow", label: t("nav.logs"), group: "nav", icon: KanbanSquare, run: () => router.push("/workflow") },
-      { id: "files", label: t("nav.files"), group: "nav", icon: FolderOpen, run: () => router.push("/files") },
-      { id: "settings", label: t("nav.settings"), group: "nav", icon: Briefcase, run: () => router.push("/settings") },
+      { id: "overview", label: "Situation", group: "nav", icon: LayoutGrid, run: () => router.push("/") },
+      { id: "pipeline", label: "Pipeline", group: "nav", icon: GitBranch, run: () => router.push("/pipeline") },
+      { id: "portfolio", label: "Portefeuille", group: "nav", icon: Briefcase, run: () => router.push("/portfolio") },
+      { id: "tasks", label: "Tâches", group: "nav", icon: KanbanSquare, run: () => router.push("/tasks") },
+      { id: "files", label: "Documents", group: "nav", icon: FolderOpen, run: () => router.push("/documents") },
+      { id: "agenda", label: "Agenda", group: "nav", icon: KanbanSquare, run: () => router.push("/agenda") },
+      { id: "relations", label: "Relations", group: "nav", icon: Building2, run: () => router.push("/relations") },
+      { id: "ai", label: "IA U-investors", group: "nav", icon: LayoutGrid, run: () => router.push("/ai") },
+      { id: "settings", label: "Paramètres", group: "nav", icon: Briefcase, run: () => router.push("/settings") },
       { id: "theme", label: t("palette.toggleTheme"), group: "actions", icon: Moon, run: toggleTheme },
       { id: "locale", label: t("palette.toggleLocale"), group: "actions", icon: Languages, run: toggleLocale },
     ];
@@ -97,7 +100,7 @@ export function CommandPalette() {
       hint: [row.sector, row.country, row.score?.aiRecommendation].filter(Boolean).join(" · "),
       group: "startups",
       icon: Building2,
-      run: () => router.push(`/review?id=${encodeURIComponent(row.id)}`),
+      run: () => router.push(`/pipeline/${encodeURIComponent(row.id)}`),
     }));
     return [...startups, ...commands];
   }, [t, router, toggleLocale, needle, hits.data]);
@@ -129,9 +132,9 @@ export function CommandPalette() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]" />
+        <Dialog.Overlay className="fixed inset-0 z-[200]" style={{ background: "rgba(0, 0, 0, 0.5)" }} />
         <Dialog.Content
-          className="palette-holo fixed left-1/2 top-[18%] z-50 w-[92vw] max-w-lg -translate-x-1/2 overflow-hidden rounded-lg border border-line bg-surface shadow-overlay"
+          className="palette-holo fixed left-1/2 top-[18%] z-[201] w-[92vw] max-w-lg -translate-x-1/2 overflow-hidden rounded-lg border border-line bg-surface shadow-overlay"
           onKeyDown={onKeyDown}
           aria-describedby={undefined}
         >
