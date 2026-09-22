@@ -80,15 +80,15 @@ export function CommandPalette() {
 
   const items = useMemo<Item[]>(() => {
     const nav: Item[] = [
-      { id: "overview", label: "Situation", group: "nav", icon: LayoutGrid, run: () => router.push("/") },
-      { id: "pipeline", label: "Pipeline", group: "nav", icon: GitBranch, run: () => router.push("/pipeline") },
-      { id: "portfolio", label: "Portefeuille", group: "nav", icon: Briefcase, run: () => router.push("/portfolio") },
-      { id: "tasks", label: "Tâches", group: "nav", icon: KanbanSquare, run: () => router.push("/tasks") },
-      { id: "files", label: "Documents", group: "nav", icon: FolderOpen, run: () => router.push("/documents") },
-      { id: "agenda", label: "Agenda", group: "nav", icon: KanbanSquare, run: () => router.push("/agenda") },
-      { id: "relations", label: "Relations", group: "nav", icon: Building2, run: () => router.push("/relations") },
-      { id: "ai", label: "IA U-investors", group: "nav", icon: LayoutGrid, run: () => router.push("/ai") },
-      { id: "settings", label: "Paramètres", group: "nav", icon: Briefcase, run: () => router.push("/settings") },
+      { id: "overview", label: t("erp.navSituation"), group: "nav", icon: LayoutGrid, run: () => router.push("/") },
+      { id: "pipeline", label: t("erp.navPipeline"), group: "nav", icon: GitBranch, run: () => router.push("/pipeline") },
+      { id: "portfolio", label: t("erp.navPortfolio"), group: "nav", icon: Briefcase, run: () => router.push("/portfolio") },
+      { id: "tasks", label: t("erp.navTasks"), group: "nav", icon: KanbanSquare, run: () => router.push("/tasks") },
+      { id: "files", label: t("erp.navDocuments"), group: "nav", icon: FolderOpen, run: () => router.push("/documents") },
+      { id: "agenda", label: t("erp.navAgenda"), group: "nav", icon: KanbanSquare, run: () => router.push("/agenda") },
+      { id: "relations", label: t("erp.navRelations"), group: "nav", icon: Building2, run: () => router.push("/relations") },
+      { id: "ai", label: t("erp.navAi"), group: "nav", icon: LayoutGrid, run: () => router.push("/ai") },
+      { id: "settings", label: t("erp.navSettings"), group: "nav", icon: Briefcase, run: () => router.push("/settings") },
       { id: "theme", label: t("palette.toggleTheme"), group: "actions", icon: Moon, run: toggleTheme },
       { id: "locale", label: t("palette.toggleLocale"), group: "actions", icon: Languages, run: toggleLocale },
     ];

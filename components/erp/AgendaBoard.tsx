@@ -46,9 +46,9 @@ export function AgendaBoard({ data }: { data: AgendaPayload }) {
         subtitle={t("erp.agendaSubtitle")}
         action={<Button onClick={() => setNote(true)}><Plus className="h-4 w-4" /> {t("erp.agendaAdd")}</Button>}
       />
-      <div className="flex flex-wrap gap-1 rounded-lg bg-[#F5F7FA] p-1 text-[13px]">
+      <div className="flex flex-wrap gap-1 rounded-lg bg-canvas p-1 text-[13px]">
         {TAB_KEYS.map((key) => (
-          <button key={key} type="button" onClick={() => setTab(key)} className={`rounded-md px-3 py-1.5 ${tab === key ? "bg-white font-medium shadow-sm" : "text-ink-3"}`}>
+          <button key={key} type="button" onClick={() => setTab(key)} className={`rounded-md px-3 py-1.5 ${tab === key ? "bg-surface font-medium shadow-sm" : "text-ink-3"}`}>
             {t(key)}
           </button>
         ))}
@@ -61,8 +61,8 @@ export function AgendaBoard({ data }: { data: AgendaPayload }) {
           {t("erp.agendaWeekOf", { from: formatAppDate(monday.toISOString(), locale), to: formatAppDate(addDays(monday, 6).toISOString(), locale) })}
         </div>
         <div className="ml-auto flex rounded-lg border border-line text-[12px]">
-          <button type="button" onClick={() => { setView("week"); setTab("erp.agendaCal"); }} className={cn("px-3 py-1.5", view === "week" && tab === "erp.agendaCal" ? "bg-[#2563EB] text-white" : "text-ink-3")}>{t("erp.week")}</button>
-          <button type="button" onClick={() => setView("list")} className={cn("px-3 py-1.5", view === "list" || showList ? "bg-[#2563EB] text-white" : "text-ink-3")}>{t("erp.agendaList")}</button>
+          <button type="button" onClick={() => { setView("week"); setTab("erp.agendaCal"); }} className={cn("px-3 py-1.5", view === "week" && tab === "erp.agendaCal" ? "bg-cvd text-white" : "text-ink-3")}>{t("erp.week")}</button>
+          <button type="button" onClick={() => setView("list")} className={cn("px-3 py-1.5", view === "list" || showList ? "bg-cvd text-white" : "text-ink-3")}>{t("erp.agendaList")}</button>
         </div>
       </div>
       <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
@@ -84,7 +84,7 @@ export function AgendaBoard({ data }: { data: AgendaPayload }) {
                     <tr key={e.id}>
                       <td>{formatAppDate(e.date, locale)}</td>
                       <td><span className={cn("rounded-md px-1.5 py-0.5 text-[12px]", KINDS[e.kind]?.cls)}>{t(e.kind === "pipeline" ? "erp.agendaFounderCall" : e.kind === "portfolio" ? "erp.agendaPortFollow" : e.kind === "diligence" ? "erp.agendaDd" : e.kind === "ic" ? "erp.agendaIc" : "erp.agendaInternal")}</span></td>
-                      <td><Link href={`/pipeline/${e.startupId}`} className="text-[#2563EB]">{e.title}</Link></td>
+                      <td><Link href={`/pipeline/${e.startupId}`} className="text-cvd">{e.title}</Link></td>
                     </tr>
                   ))
                 )}
@@ -147,8 +147,8 @@ export function AgendaBoard({ data }: { data: AgendaPayload }) {
             <ul className="space-y-2 text-[13px]">
               {data.upcoming.length === 0 ? <li className="text-ink-3">{t("erp.agendaNone")}</li> : data.upcoming.map((e) => (
                 <li key={e.id} className="flex gap-2">
-                  <span className="w-12 text-[11px] font-bold uppercase text-[#2563EB]">{formatAppDate(e.date, locale)}</span>
-                  <Link href={`/pipeline/${e.startupId}`} className="flex-1 hover:text-[#2563EB]">{e.title}</Link>
+                  <span className="w-12 text-[11px] font-bold uppercase text-cvd">{formatAppDate(e.date, locale)}</span>
+                  <Link href={`/pipeline/${e.startupId}`} className="flex-1 hover:text-cvd">{e.title}</Link>
                 </li>
               ))}
             </ul>
@@ -157,13 +157,13 @@ export function AgendaBoard({ data }: { data: AgendaPayload }) {
             <h3 className="mb-2 font-semibold">{t("erp.agendaMyCals")}</h3>
             <ul className="space-y-1 text-ink-2">
               {[t("erp.agendaMineDriss"), t("erp.agendaTeamCal"), t("erp.agendaFounderCalls"), t("erp.agendaDd"), t("erp.agendaIcCal"), t("erp.agendaEco")].map((l) => (
-                <li key={l}><label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#2563EB]" /> {l}</label></li>
+                <li key={l}><label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-cvd" /> {l}</label></li>
               ))}
             </ul>
           </div>
           <div className="erp-card p-4 text-[13px]">
             <h3 className="mb-2 font-semibold">{t("erp.agendaQuick")}</h3>
-            <ul className="space-y-1 text-[#2563EB]">
+            <ul className="space-y-1 text-cvd">
               <li><Link href="/relations">{t("erp.agendaPlanCall")}</Link></li>
               <li><Link href="/tasks">{t("erp.agendaPlanIc")}</Link></li>
               <li><Link href="/pipeline">{t("erp.agendaAddMilestone")}</Link></li>

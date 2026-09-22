@@ -61,7 +61,7 @@ export function RelationsBoard({ data }: { data: RelationsPayload }) {
         <StatCard icon={<Network className="h-4 w-4" />} value="—" label={t("erp.relIntros")} iconClass="bg-[#EDE9FE] text-[#7c3aed]" />
       </div>
       <div className="flex flex-wrap gap-2">
-        <div className="flex h-9 flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-[13px]">
+        <div className="flex h-9 flex-1 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-[13px]">
           <Search className="h-4 w-4 text-ink-3" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("erp.relSearch")} className="w-full outline-none" />
         </div>
@@ -83,7 +83,7 @@ export function RelationsBoard({ data }: { data: RelationsPayload }) {
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
-        <button type="button" className="text-[13px] text-[#2563EB]" onClick={() => { setQ(""); setKind("all"); setCountry("all"); setStartup("all"); }}>{t("erp.reset")}</button>
+        <button type="button" className="text-[13px] text-cvd" onClick={() => { setQ(""); setKind("all"); setCountry("all"); setStartup("all"); }}>{t("erp.reset")}</button>
       </div>
       <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
         <section className="erp-card overflow-hidden">
@@ -116,7 +116,7 @@ export function RelationsBoard({ data }: { data: RelationsPayload }) {
                   </td>
                   <td>{c.organization}</td>
                   <td><StatusChip label={L(c.kind)} tone={TONE[c.kind]} /></td>
-                  <td><Link href={`/pipeline/${c.startupId}`} className="text-[#2563EB]">{c.startup}</Link></td>
+                  <td><Link href={`/pipeline/${c.startupId}`} className="text-cvd">{c.startup}</Link></td>
                   <td><CountryCell country={c.country} /></td>
                   <td>{formatAppDate(c.lastTouch, locale)}</td>
                   <td>{L(c.nextAction)}</td>
@@ -144,7 +144,7 @@ export function RelationsBoard({ data }: { data: RelationsPayload }) {
           </div>
           <div className="erp-card p-4 text-[13px]">
             <h3 className="mb-2 font-semibold">{t("erp.relQuick")}</h3>
-            <ul className="space-y-1 text-[#2563EB]">
+            <ul className="space-y-1 text-cvd">
               <li><button type="button" onClick={() => { setKind("all"); setQ(""); }}>{t("erp.relMine")}</button></li>
               <li><button type="button" onClick={() => setKind("Fondateur")}>{t("erp.relFounderContacts")}</button></li>
               <li><button type="button" onClick={() => setKind("Investisseur")}>{t("erp.relInvestors")}</button></li>

@@ -36,7 +36,7 @@ export function ErpSidebar({ taskCount = 0 }: { taskCount?: number }) {
   const { t } = useLocale();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[230px] flex-col bg-[#1B2B44] text-white md:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[230px] flex-col bg-sidebar text-white md:flex">
       <div className="flex items-center gap-2 px-5 pb-5 pt-6">
         <UMark size={28} className="shrink-0" />
         <div className="text-[16px] font-bold tracking-tight">U-investors</div>
@@ -51,7 +51,7 @@ export function ErpSidebar({ taskCount = 0 }: { taskCount?: number }) {
               href={item.href}
               className={cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13.5px] transition-colors",
-                on ? "bg-[#2563EB] font-medium text-white" : "text-white/55 hover:bg-white/8 hover:text-white",
+                on ? "bg-cvd font-medium text-white" : "text-white/55 hover:bg-white/8 hover:text-white",
               )}
             >
               <Icon className="h-[16px] w-[16px] shrink-0" />
@@ -64,7 +64,7 @@ export function ErpSidebar({ taskCount = 0 }: { taskCount?: number }) {
         })}
       </nav>
       <div className="px-5 py-4 text-[10px] leading-4 text-white/35">
-        U-investors Platform
+        {t("erp.platform")}
         <div>v1.0.0</div>
       </div>
     </aside>

@@ -55,7 +55,7 @@ export function DocumentsBoard({ rows, names }: { rows: DocRow[]; names: Record<
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
-        <div className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-[13px]">
+        <div className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-[13px]">
           <Search className="h-4 w-4 text-ink-3" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("erp.docsSearch")} className="w-full outline-none" />
         </div>
@@ -67,7 +67,7 @@ export function DocumentsBoard({ rows, names }: { rows: DocRow[]; names: Record<
             </option>
           ))}
         </select>
-        <button type="button" onClick={() => { setQ(""); setType("all"); setLink("all"); }} className="text-[13px] text-[#2563EB]">
+        <button type="button" onClick={() => { setQ(""); setType("all"); setLink("all"); }} className="text-[13px] text-cvd">
           {t("erp.reset")}
         </button>
       </div>
@@ -96,7 +96,7 @@ export function DocumentsBoard({ rows, names }: { rows: DocRow[]; names: Record<
                   <td>{(r.startup_id && names[r.startup_id]) || t("erp.docsUnlinkedLabel")}</td>
                   <td>
                     <a
-                      className="text-[13px] font-medium text-[#2563EB]"
+                      className="text-[13px] font-medium text-cvd"
                       href={r.openHref || `/api/documents/${encodeURIComponent(r.external_file_id)}/open`}
                       target="_blank"
                       rel="noreferrer"

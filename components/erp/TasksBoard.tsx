@@ -58,7 +58,7 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
     { label: "À décider", n: data.tasks.filter((x) => x.statut === "À décider").length },
     { label: "Bloquées", n: data.tasks.filter((x) => x.statut === "Bloquée").length },
   ];
-  const COLORS = ["#64748b", "#2563EB", "#7c3aed", "#D97706", "#DC2626"];
+  const COLORS = ["#64748b", "var(--cvd)", "#7c3aed", "#D97706", "#DC2626"];
 
   const reset = () => {
     setQ("");
@@ -94,16 +94,16 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
           <StatCard icon={<Users className="h-4 w-4" />} value={String(data.ic)} label={t("erp.tasksIc")} selected={focus === "ic"} iconClass="bg-[#EDE9FE] text-[#7c3aed]" />
         </button>
       </div>
-      <div className="flex gap-1 rounded-lg bg-[#F5F7FA] p-1 text-[13px]">
-        <button type="button" onClick={() => setTab("mine")} className={`rounded-md px-3 py-1.5 ${tab === "mine" ? "bg-white font-medium shadow-sm" : "text-ink-3"}`}>
+      <div className="flex gap-1 rounded-lg bg-canvas p-1 text-[13px]">
+        <button type="button" onClick={() => setTab("mine")} className={`rounded-md px-3 py-1.5 ${tab === "mine" ? "bg-surface font-medium shadow-sm" : "text-ink-3"}`}>
           {t("erp.tasksMine")}
         </button>
-        <button type="button" onClick={() => setTab("team")} className={`rounded-md px-3 py-1.5 ${tab === "team" ? "bg-white font-medium shadow-sm" : "text-ink-3"}`}>
+        <button type="button" onClick={() => setTab("team")} className={`rounded-md px-3 py-1.5 ${tab === "team" ? "bg-surface font-medium shadow-sm" : "text-ink-3"}`}>
           {t("erp.tasksTeam")}
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
-        <div className="flex h-9 flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-[13px]">
+        <div className="flex h-9 flex-1 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-[13px]">
           <Search className="h-4 w-4 text-ink-3" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("erp.tasksSearch")} className="w-full outline-none" />
         </div>
@@ -117,9 +117,9 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
         </select>
         <select className="h-9 rounded-lg border border-line px-2 text-[13px]" value={priority} onChange={(e) => setPriority(e.target.value)}>
           <option value="all">{t("erp.priorityAll")}</option>
-          <option value="Haute">{t("erp.todo") === "To do" ? "High" : "Haute"}</option>
-          <option value="Moyenne">{locale === "en" ? "Medium" : "Moyenne"}</option>
-          <option value="Basse">{locale === "en" ? "Low" : "Basse"}</option>
+          <option value="Haute">{t("erp.high")}</option>
+          <option value="Moyenne">{t("erp.medium")}</option>
+          <option value="Basse">{t("erp.low")}</option>
         </select>
         <select className="h-9 rounded-lg border border-line px-2 text-[13px]" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="all">{t("erp.statusAll")}</option>
@@ -127,7 +127,7 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
           <option value="En cours">{t("erp.inProgress")}</option>
           <option value="À valider">{t("erp.toValidate")}</option>
         </select>
-        <button type="button" className="text-[13px] text-[#2563EB]" onClick={reset}>
+        <button type="button" className="text-[13px] text-cvd" onClick={reset}>
           {t("erp.reset")}
         </button>
       </div>
@@ -137,7 +137,7 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
             <thead>
               <tr>
                 <th className="w-8">
-                  <input type="checkbox" className="accent-[#2563EB]" aria-label={t("erp.all")} />
+                  <input type="checkbox" className="accent-cvd" aria-label={t("erp.all")} />
                 </th>
                 <th>{t("erp.tasksCol")}</th>
                 <th>{t("erp.sitStartup")}</th>
@@ -160,7 +160,7 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
                 rows.map((task) => (
                   <tr key={task.id} className="erp-row-link" onClick={() => router.push(`/pipeline/${task.startupId}`)}>
                     <td>
-                      <input type="checkbox" className="accent-[#2563EB]" aria-label={task.title} onClick={(e) => e.stopPropagation()} />
+                      <input type="checkbox" className="accent-cvd" aria-label={task.title} onClick={(e) => e.stopPropagation()} />
                     </td>
                     <td className="font-medium text-ink">{L(task.title)}</td>
                     <td>
@@ -228,7 +228,7 @@ export function TasksBoard({ data }: { data: TasksPayload }) {
           </div>
           <div className="erp-card p-4 text-[13px]">
             <h3 className="mb-2 font-semibold">{t("erp.tasksQuick")}</h3>
-            <ul className="space-y-1 text-[#2563EB]">
+            <ul className="space-y-1 text-cvd">
               <li>
                 <button type="button" onClick={() => setTab("mine")}>
                   {t("erp.tasksSeeMine")}

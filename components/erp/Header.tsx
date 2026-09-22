@@ -7,6 +7,7 @@ import { Bell, Calendar, ChevronDown, FileText, Search, TriangleAlert } from "lu
 import { formatHeaderDate } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n";
+import { DayNightToggle } from "@/components/shell/ThemeToggle";
 import type { SituationPayload } from "@/lib/erp/payloads";
 
 const MOBILE = [
@@ -17,10 +18,10 @@ const MOBILE = [
 ];
 
 const KIND_ICON = {
-  term_sheet: { Icon: FileText, className: "bg-blue-100 text-blue-600" },
-  docs: { Icon: FileText, className: "bg-blue-100 text-blue-600" },
-  meeting: { Icon: Calendar, className: "bg-violet-100 text-violet-600" },
-  overdue: { Icon: TriangleAlert, className: "bg-red-100 text-red-600" },
+  term_sheet: { Icon: FileText, className: "bg-cvd-soft text-cvd" },
+  docs: { Icon: FileText, className: "bg-cvd-soft text-cvd" },
+  meeting: { Icon: Calendar, className: "bg-[#EDE9FE] text-[#6d28d9] dark:bg-violet-950/70 dark:text-violet-300" },
+  overdue: { Icon: TriangleAlert, className: "bg-[#FEE2E2] text-[#b91c1c] dark:bg-red-950/70 dark:text-red-300" },
 };
 
 export function ErpHeader({
@@ -40,23 +41,24 @@ export function ErpHeader({
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-white">
+    <header className="sticky top-0 z-20 border-b border-line bg-surface">
       <div className="flex h-14 items-center gap-3 px-4 md:px-6">
         <button
           type="button"
           onClick={() => window.dispatchEvent(new Event("cvd:open-palette"))}
-          className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-[#F5F7FA] px-3 text-[13px] text-ink-3 md:max-w-xl"
+          className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-canvas px-3 text-[13px] text-ink-3 md:max-w-xl"
         >
           <Search className="h-4 w-4" />
           <span className="truncate">{t("erp.search")}</span>
           <kbd className="ml-auto hidden text-[11px] text-ink-3 sm:inline">⌘ K</kbd>
         </button>
         <div className="hidden whitespace-nowrap text-[13px] text-ink-2 lg:block">{formatHeaderDate(new Date(), locale)}</div>
+        <DayNightToggle />
         <div className="flex rounded-lg border border-line text-[11px] font-semibold">
-          <button type="button" onClick={() => setLocale("fr")} className={cn("px-2 py-1", locale === "fr" ? "bg-[#2563EB] text-white" : "text-ink-3")}>
+          <button type="button" onClick={() => setLocale("fr")} className={cn("px-2 py-1", locale === "fr" ? "bg-cvd text-white" : "text-ink-3")}>
             FR
           </button>
-          <button type="button" onClick={() => setLocale("en")} className={cn("px-2 py-1", locale === "en" ? "bg-[#2563EB] text-white" : "text-ink-3")}>
+          <button type="button" onClick={() => setLocale("en")} className={cn("px-2 py-1", locale === "en" ? "bg-cvd text-white" : "text-ink-3")}>
             EN
           </button>
         </div>
@@ -78,7 +80,7 @@ export function ErpHeader({
             ) : null}
           </button>
           {open ? (
-            <div className="absolute right-0 top-11 z-30 w-[340px] rounded-2xl border border-line bg-white p-3 shadow-overlay">
+            <div className="absolute right-0 top-11 z-30 w-[340px] rounded-2xl border border-line bg-surface p-3 shadow-overlay">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[14px] font-semibold">{t("erp.notifications")}</span>
                 <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-600">{t("erp.newCount", { n: unread })}</span>
@@ -91,7 +93,7 @@ export function ErpHeader({
                     const meta = KIND_ICON[n.kind] ?? KIND_ICON.docs;
                     const Icon = meta.Icon;
                     return (
-                      <li key={n.id} className="flex items-start gap-2 rounded-xl px-2 py-2 hover:bg-[#F5F7FA]">
+                      <li key={n.id} className="flex items-start gap-2 rounded-xl px-2 py-2 hover:bg-canvas">
                         <span className={cn("mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg", meta.className)}>
                           <Icon className="h-4 w-4" />
                         </span>
@@ -105,7 +107,7 @@ export function ErpHeader({
                   })
                 )}
               </ul>
-              <Link href="/tasks" className="mt-2 block text-center text-[12px] font-medium text-[#2563EB]" onClick={() => setOpen(false)}>
+              <Link href="/tasks" className="mt-2 block text-center text-[12px] font-medium text-cvd" onClick={() => setOpen(false)}>
                 {t("erp.seeAllNotifications")}
               </Link>
             </div>
@@ -120,15 +122,15 @@ export function ErpHeader({
             }}
             className="flex items-center gap-2 rounded-full pl-1 pr-1 text-left hover:bg-surface-2"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2563EB] text-[12px] font-bold text-white">D</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cvd text-[12px] font-bold text-white">D</span>
             <span className="hidden leading-tight sm:block">
-              <span className="block text-[13px] font-semibold text-ink">Driss</span>
-              <span className="block text-[11px] text-ink-3">Managing Director</span>
+              <span className="block text-[13px] font-semibold text-ink">{t("erp.userName")}</span>
+              <span className="block text-[11px] text-ink-3">{t("erp.mdRole")}</span>
             </span>
             <ChevronDown className="hidden h-4 w-4 text-ink-3 sm:block" />
           </button>
           {menu ? (
-            <div className="absolute right-0 top-11 z-30 w-44 rounded-xl border border-line bg-white p-1 shadow-overlay">
+            <div className="absolute right-0 top-11 z-30 w-44 rounded-xl border border-line bg-surface p-1 shadow-overlay">
               <button type="button" onClick={signOut} className="w-full rounded-lg px-3 py-2 text-left text-[13px] hover:bg-surface-2">
                 {t("erp.signOut")}
               </button>
@@ -143,7 +145,7 @@ export function ErpHeader({
             <Link
               key={item.href}
               href={item.href}
-              className={cn("rounded-lg px-3 py-1.5 text-[13px]", active ? "bg-cvd-soft font-medium text-[#2563EB]" : "text-ink-3")}
+              className={cn("rounded-lg px-3 py-1.5 text-[13px]", active ? "bg-cvd-soft font-medium text-cvd" : "text-ink-3")}
             >
               {t(item.key)}
             </Link>

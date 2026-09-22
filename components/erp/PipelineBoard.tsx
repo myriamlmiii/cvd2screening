@@ -78,23 +78,23 @@ export function PipelineBoard({ data }: { data: PipelinePayload }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-[13px]">
+        <div className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-[13px]">
           <Search className="h-4 w-4 text-ink-3" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("erp.pipeSearch")} className="w-full outline-none" />
         </div>
-        <select className="h-9 rounded-lg border border-line bg-white px-2 text-[13px]" value={sector} onChange={(e) => setSector(e.target.value)}>
+        <select className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]" value={sector} onChange={(e) => setSector(e.target.value)}>
           <option value="all">{t("erp.sectorAll")}</option>
           {sectors.map((s) => (
             <option key={s}>{s}</option>
           ))}
         </select>
-        <select className="h-9 rounded-lg border border-line bg-white px-2 text-[13px]" value={geo} onChange={(e) => setGeo(e.target.value)}>
+        <select className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]" value={geo} onChange={(e) => setGeo(e.target.value)}>
           <option value="all">{t("erp.geoAll")}</option>
           {geos.map((s) => (
             <option key={s}>{s}</option>
           ))}
         </select>
-        <select className="h-9 rounded-lg border border-line bg-white px-2 text-[13px]" value={stage} onChange={(e) => setStage(e.target.value)}>
+        <select className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]" value={stage} onChange={(e) => setStage(e.target.value)}>
           <option value="all">{t("erp.stageAll")}</option>
           {FUNNEL.map((f) => (
             <option key={f.id} value={f.id}>
@@ -102,13 +102,13 @@ export function PipelineBoard({ data }: { data: PipelinePayload }) {
             </option>
           ))}
         </select>
-        <select className="h-9 rounded-lg border border-line bg-white px-2 text-[13px]" defaultValue="all">
+        <select className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]" defaultValue="all">
           <option value="all">{t("erp.statusAll")}</option>
         </select>
-        <select className="h-9 rounded-lg border border-line bg-white px-2 text-[13px]" defaultValue="all">
+        <select className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]" defaultValue="all">
           <option value="all">{t("erp.assignedTo")}</option>
         </select>
-        <button type="button" onClick={reset} className="text-[13px] text-[#2563EB]">
+        <button type="button" onClick={reset} className="text-[13px] text-cvd">
           {t("erp.reset")}
         </button>
       </div>

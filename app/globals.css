@@ -27,26 +27,26 @@
 }
 
 .dark {
-  --canvas: #0b1524;
-  --surface: #122033;
-  --surface-2: #1a2b44;
-  --ink: #eef3f8;
-  --ink-2: #c3cedb;
-  --ink-3: #8a9bb0;
-  --line: #24364d;
-  --line-strong: #35506e;
-  --cvd: #3aa394;
-  --cvd-soft: rgba(58, 163, 148, 0.16);
+  --canvas: #0d1520;
+  --surface: #172334;
+  --surface-2: #1e2d42;
+  --ink: #e8eef6;
+  --ink-2: #b7c4d6;
+  --ink-3: #8494ab;
+  --line: #2a3b52;
+  --line-strong: #3d5270;
+  --cvd: #3b82f6;
+  --cvd-soft: rgba(59, 130, 246, 0.2);
   --positive: #4ade80;
-  --warning: #fb923c;
+  --warning: #fbbf24;
   --critical: #f87171;
   --info: #60a5fa;
-  --sidebar: #08172c;
-  --sidebar-2: #102544;
-  --navy: #08172c;
+  --sidebar: #0a1220;
+  --sidebar-2: #121c2e;
+  --navy: #0a1220;
   --grain-opacity: 0;
-  --select-glow-ring: #3aa394;
-  --select-glow: rgba(58, 163, 148, 0.3);
+  --select-glow-ring: #3b82f6;
+  --select-glow: rgba(59, 130, 246, 0.28);
   color-scheme: dark;
 }
 
@@ -77,6 +77,10 @@ body {
   @apply rounded-2xl border border-line bg-surface shadow-[0_8px_24px_-18px_rgba(27,43,68,0.35)];
 }
 
+.dark .erp-card {
+  box-shadow: 0 8px 24px -18px rgba(0, 0, 0, 0.65);
+}
+
 .erp-chip {
   @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium;
 }
@@ -90,7 +94,7 @@ body {
 }
 
 .erp-table tbody tr {
-  @apply border-t border-line transition-colors hover:bg-[#f7fafc];
+  @apply border-t border-line transition-colors hover:bg-surface-2;
 }
 
 .erp-table tbody tr.erp-row-link {
@@ -102,7 +106,7 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c9d5e4;
+  background: var(--line-strong);
   border-radius: 99px;
 }
 

@@ -13,7 +13,7 @@ import { useLocale } from "@/lib/i18n";
 import { localizePhrase } from "@/lib/erp/labels";
 import type { PortfolioPayload } from "@/lib/erp/payloads";
 
-const COLORS = ["#2563EB", "#16A34A", "#D97706", "#7c3aed", "#DC2626"];
+const COLORS = ["var(--cvd)", "#16A34A", "#D97706", "#7c3aed", "#DC2626"];
 
 export function PortfolioBoard({ data }: { data: PortfolioPayload }) {
   const { kpis, rows, sectors, geos, years } = data;
@@ -58,7 +58,7 @@ export function PortfolioBoard({ data }: { data: PortfolioPayload }) {
                 <Tooltip />
                 <Legend />
                 <Bar dataKey="invested" name={t("erp.capitalInvested")} fill="#93C5FD" radius={4} />
-                <Bar dataKey="value" name={t("erp.estimatedValue")} fill="#2563EB" radius={4} />
+                <Bar dataKey="value" name={t("erp.estimatedValue")} fill="var(--cvd)" radius={4} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -66,11 +66,11 @@ export function PortfolioBoard({ data }: { data: PortfolioPayload }) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-[13px]">
+        <div className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-[13px]">
           <Search className="h-4 w-4 text-ink-3" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("erp.portSearch")} className="w-full outline-none" />
         </div>
-        <select className="h-9 rounded-lg border border-line bg-white px-2 text-[13px]" value={sort} onChange={(e) => setSort(e.target.value)}>
+        <select className="h-9 rounded-lg border border-line bg-surface px-2 text-[13px]" value={sort} onChange={(e) => setSort(e.target.value)}>
           <option value="name">{t("erp.portSortName")}</option>
           <option value="date">{t("erp.portSortDate")}</option>
         </select>
@@ -130,7 +130,7 @@ export function PortfolioBoard({ data }: { data: PortfolioPayload }) {
                 <td>{r.multiple || "—"}</td>
                 <td><StatusChip label={L(r.situation) || t("erp.portActiveStatus")} tone="green" /></td>
                 <td>
-                  <Link href={`/portfolio/${r.id}`} className="text-[#2563EB]" onClick={(e) => e.stopPropagation()}>→</Link>
+                  <Link href={`/portfolio/${r.id}`} className="text-cvd" onClick={(e) => e.stopPropagation()}>→</Link>
                 </td>
               </tr>
             ))}

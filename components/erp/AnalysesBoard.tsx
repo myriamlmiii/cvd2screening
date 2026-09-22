@@ -11,7 +11,7 @@ import { displayScore } from "@/lib/deal-view";
 import { funnelStage } from "@/lib/erp/model";
 import { useLocale } from "@/lib/i18n";
 
-const COLORS = ["#2563EB", "#16A34A", "#D97706", "#7c3aed", "#DC2626"];
+const COLORS = ["var(--cvd)", "#16A34A", "#D97706", "#7c3aed", "#DC2626"];
 
 export function AnalysesBoard({
   pipeline,
@@ -117,7 +117,7 @@ export function AnalysesBoard({
                 <BarChart data={sourcing}>
                   <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                   <Tooltip />
-                  <Bar dataKey="n" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="n" fill="var(--cvd)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -128,7 +128,7 @@ export function AnalysesBoard({
         <div className="flex items-center justify-between px-5 py-4">
           <div className="text-[15px] font-semibold">{bucket ? `${t("erp.anaDist")} · ${bucket}` : t("erp.anaMix")}</div>
           {bucket ? (
-            <button type="button" className="text-[13px] text-[#2563EB]" onClick={() => setBucket(null)}>
+            <button type="button" className="text-[13px] text-cvd" onClick={() => setBucket(null)}>
               {t("erp.reset")}
             </button>
           ) : null}
@@ -146,7 +146,7 @@ export function AnalysesBoard({
               {inBucket.slice(0, 20).map((d) => (
                 <tr key={d.id}>
                   <td>
-                    <Link href={`/pipeline/${d.id}`} className="font-medium text-[#2563EB]">
+                    <Link href={`/pipeline/${d.id}`} className="font-medium text-cvd">
                       {d.name}
                     </Link>
                   </td>

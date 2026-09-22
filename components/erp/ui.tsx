@@ -22,20 +22,20 @@ export function StatusChip({
   tone: "green" | "blue" | "amber" | "violet" | "slate" | "red" | "pink";
 }) {
   const map = {
-    green: "bg-[#DCFCE7] text-[#15803d]",
-    blue: "bg-[#DBEAFE] text-[#1d4ed8]",
-    amber: "bg-[#FEF3C7] text-[#b45309]",
-    violet: "bg-[#EDE9FE] text-[#6d28d9]",
-    slate: "bg-slate-100 text-slate-600",
-    red: "bg-[#FEE2E2] text-[#b91c1c]",
-    pink: "bg-[#FCE7F3] text-[#be185d]",
+    green: "bg-[#DCFCE7] text-[#15803d] dark:bg-emerald-950/70 dark:text-emerald-300",
+    blue: "bg-cvd-soft text-[#1d4ed8] dark:bg-blue-950/70 dark:text-blue-300",
+    amber: "bg-[#FEF3C7] text-[#b45309] dark:bg-amber-950/70 dark:text-amber-300",
+    violet: "bg-[#EDE9FE] text-[#6d28d9] dark:bg-violet-950/70 dark:text-violet-300",
+    slate: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+    red: "bg-[#FEE2E2] text-[#b91c1c] dark:bg-red-950/70 dark:text-red-300",
+    pink: "bg-[#FCE7F3] text-[#be185d] dark:bg-pink-950/70 dark:text-pink-300",
   };
   return <span className={cn("erp-chip", map[tone])}>{label}</span>;
 }
 
 export function ScorePill({ score }: { score: number | null | undefined }) {
   if (score == null) return <span className="text-ink-3">—</span>;
-  const tone = score >= 80 ? "bg-[#DCFCE7] text-[#15803d]" : score >= 60 ? "bg-[#FEF3C7] text-[#b45309]" : "bg-[#FEE2E2] text-[#b91c1c]";
+  const tone = score >= 80 ? "bg-[#DCFCE7] text-[#15803d] dark:bg-emerald-950/70 dark:text-emerald-300" : score >= 60 ? "bg-[#FEF3C7] text-[#b45309] dark:bg-amber-950/70 dark:text-amber-300" : "bg-[#FEE2E2] text-[#b91c1c] dark:bg-red-950/70 dark:text-red-300";
   return <span className={cn("inline-flex min-w-[2rem] justify-center rounded-full px-2 py-0.5 text-[13px] font-bold", tone)}>{score}</span>;
 }
 
@@ -45,7 +45,7 @@ export function StatCard({
   label,
   hint,
   selected,
-  iconClass = "bg-[#DBEAFE] text-[#2563EB]",
+  iconClass = "bg-cvd-soft text-cvd",
 }: {
   icon: ReactNode;
   value: string;
@@ -55,7 +55,7 @@ export function StatCard({
   iconClass?: string;
 }) {
   return (
-    <div className={cn("erp-card flex items-center gap-3 px-4 py-3 transition", selected && "ring-2 ring-[#2563EB]")}>
+    <div className={cn("erp-card flex items-center gap-3 px-4 py-3 transition", selected && "ring-2 ring-cvd")}>
       <span className={cn("flex h-10 w-10 items-center justify-center rounded-full", iconClass)}>{icon}</span>
       <div>
         <div className="text-[20px] font-bold leading-tight text-ink">{value}</div>
@@ -92,7 +92,7 @@ export function PageHeader({
   return (
     <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-[26px] font-bold tracking-tight text-[#1B2B44]">{title}</h1>
+        <h1 className="text-[26px] font-bold tracking-tight text-ink">{title}</h1>
         {subtitle ? <p className="mt-0.5 text-[13px] text-ink-3">{subtitle}</p> : null}
       </div>
       {action}

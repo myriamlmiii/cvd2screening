@@ -28,8 +28,8 @@ export function PipelineTable({ rows }: { rows: Row[] }) {
     () => [
       {
         id: "select",
-        header: () => <input type="checkbox" className="accent-[#2563EB]" aria-label={t("erp.pipeSelectAll")} />,
-        cell: ({ row }) => <input type="checkbox" className="accent-[#2563EB]" aria-label={row.original.name} onClick={(e) => e.stopPropagation()} />,
+        header: () => <input type="checkbox" className="accent-cvd" aria-label={t("erp.pipeSelectAll")} />,
+        cell: ({ row }) => <input type="checkbox" className="accent-cvd" aria-label={row.original.name} onClick={(e) => e.stopPropagation()} />,
       },
       {
         accessorKey: "name",
@@ -75,7 +75,7 @@ export function PipelineTable({ rows }: { rows: Row[] }) {
         enableSorting: false,
         cell: ({ row }) =>
           row.original.pitchUrl ? (
-            <a href={row.original.pitchUrl} className="text-[13px] text-[#2563EB]" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+            <a href={row.original.pitchUrl} className="text-[13px] text-cvd" target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
               {t("erp.pipeSeePitch")}
             </a>
           ) : (
@@ -87,7 +87,7 @@ export function PipelineTable({ rows }: { rows: Row[] }) {
         header: t("erp.pipeFiche"),
         enableSorting: false,
         cell: ({ row }) => (
-          <Link href={`/pipeline/${row.original.id}`} className="text-[13px] text-[#2563EB]" onClick={(e) => e.stopPropagation()}>
+          <Link href={`/pipeline/${row.original.id}`} className="text-[13px] text-cvd" onClick={(e) => e.stopPropagation()}>
             {t("erp.pipeOpenFiche")}
           </Link>
         ),
@@ -171,7 +171,7 @@ export function PipelineTable({ rows }: { rows: Row[] }) {
             →
           </button>
           <select
-            className="h-8 rounded-lg border border-line bg-white px-2"
+            className="h-8 rounded-lg border border-line bg-surface px-2"
             value={table.getState().pagination.pageSize}
             onChange={(e) => table.setPageSize(Number(e.target.value))}
           >

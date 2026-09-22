@@ -50,10 +50,39 @@ export function applyTheme(nextDark: boolean, x?: number, y?: number) {
 }
 
 export function applyThemeToggle(x?: number, y?: number) {
-  const mode = readThemeMode();
-  const order: ThemeMode[] = ["dark", "light", "system"];
-  const next = order[(order.indexOf(mode) + 1) % order.length];
-  applyThemeMode(next, x, y);
+  const nextDark = !document.documentElement.classList.contains("dark");
+  applyTheme(nextDark, x, y);
+}
+
+export function DayNightToggle({ className }: { className?: string }) {
+  const { t } = useLocale();
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setDark(document.documentElement.classList.contains("dark"));
+    sync();
+    window.addEventListener("cvd:theme", sync);
+    return () => window.removeEventListener("cvd:theme", sync);
+  }, []);
+
+  return (
+    <div className={cn("flex rounded-lg border border-line text-[11px] font-semibold", className)}>
+      <button
+        type="button"
+        onClick={(e) => applyTheme(false, e.clientX, e.clientY)}
+        className={cn("px-2 py-1", !dark ? "bg-cvd text-white" : "text-ink-3")}
+      >
+        {t("topbar.light")}
+      </button>
+      <button
+        type="button"
+        onClick={(e) => applyTheme(true, e.clientX, e.clientY)}
+        className={cn("px-2 py-1", dark ? "bg-cvd text-white" : "text-ink-3")}
+      >
+        {t("topbar.dark")}
+      </button>
+    </div>
+  );
 }
 
 export function ThemeToggle({ className }: { label?: string; className?: string }) {

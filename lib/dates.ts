@@ -22,8 +22,7 @@ export function formatAppDate(iso: string | Date | null | undefined, locale: Dat
 
 /** e.g. "Mardi 16 septembre 2026" */
 export function formatHeaderDate(d = new Date(), locale: DateLocale = "fr") {
-  const raw = format(d, "EEEE d MMMM yyyy", { locale: loc(locale) });
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
+  return format(d, "d MMM yyyy", { locale: loc(locale) });
 }
 
 export function relativeDate(iso: string | Date | null | undefined, locale: DateLocale = "fr") {
