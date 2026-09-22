@@ -37,7 +37,7 @@ export function emailAllowed(email: string) {
 }
 
 export function demoPassword() {
-  return process.env.DEMO_PASSWORD || "1234@5";
+  return "12345@";
 }
 
 export function authSecret() {

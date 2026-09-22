@@ -3,8 +3,8 @@ import { allowedEmails, createSessionToken, credentialsMatch, readSessionToken }
 
 describe("demo session", () => {
   it("accepts the supervisor preview credentials", () => {
-    expect(credentialsMatch("investors123@gmail.com", "1234@5")).toBe(true);
-    expect(credentialsMatch("Investors123@gmail.com", "1234@5")).toBe(true);
+    expect(credentialsMatch("investors123@gmail.com", "12345@")).toBe(true);
+    expect(credentialsMatch("Investors123@gmail.com", "12345@")).toBe(true);
     expect(credentialsMatch("investors123@gmail.com", "wrong")).toBe(false);
   });
 
@@ -14,10 +14,10 @@ describe("demo session", () => {
       "dlaraki@u-investors.com",
       "j.lobe@u-investors.com",
     ]));
-    expect(credentialsMatch("lmeriem28@gmail.com", "1234@5")).toBe(true);
-    expect(credentialsMatch("dlaraki@u-investors.com", "1234@5")).toBe(true);
-    expect(credentialsMatch("j.lobe@u-investors.com", "1234@5")).toBe(true);
-    expect(credentialsMatch("unknown@example.com", "1234@5")).toBe(false);
+    expect(credentialsMatch("lmeriem28@gmail.com", "12345@")).toBe(true);
+    expect(credentialsMatch("dlaraki@u-investors.com", "12345@")).toBe(true);
+    expect(credentialsMatch("j.lobe@u-investors.com", "12345@")).toBe(true);
+    expect(credentialsMatch("unknown@example.com", "12345@")).toBe(false);
   });
 
   it("round-trips a signed cookie payload", async () => {
