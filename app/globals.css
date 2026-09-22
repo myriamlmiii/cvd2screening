@@ -105,3 +105,12 @@ body {
   background: #c9d5e4;
   border-radius: 99px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .login-mark .animate-login-float,
+  .login-mark .animate-login-shine,
+  .login-mark .animate-login-orbit,
+  .login-shell [style*="login-float"] {
+    animation: none !important;
+  }
+}

@@ -85,10 +85,33 @@ const config: Config = {
           from: { transform: "translateX(100%)" },
           to: { transform: "translateX(0)" },
         },
+        "login-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        "login-shine": {
+          "0%": { transform: "translateX(-120%) rotate(18deg)" },
+          "100%": { transform: "translateX(220%) rotate(18deg)" },
+        },
+        "login-shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "20%": { transform: "translateX(-7px)" },
+          "40%": { transform: "translateX(7px)" },
+          "60%": { transform: "translateX(-5px)" },
+          "80%": { transform: "translateX(5px)" },
+        },
+        "login-orbit": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 220ms ease-out both",
         "drawer-in": "drawer-in 200ms cubic-bezier(0.32, 0.72, 0, 1) both",
+        "login-float": "login-float 4.5s ease-in-out infinite",
+        "login-shine": "login-shine 2.8s ease-in-out infinite",
+        "login-shake": "login-shake 420ms ease-in-out",
+        "login-orbit": "login-orbit 18s linear infinite",
       },
     },
   },
