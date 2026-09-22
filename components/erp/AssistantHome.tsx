@@ -6,6 +6,7 @@ import { FileSearch, FileText, Paperclip, Search, Send, Sparkles, Users } from "
 import type { AssistantContext } from "@/lib/erp/payloads";
 import { NoteText } from "@/components/erp/NoteText";
 import { toast } from "@/components/ui/Toaster";
+import { useLocale } from "@/lib/i18n";
 
 const PRESETS = [
   { label: "Brief quotidien", desc: "Ce qui mérite votre attention aujourd'hui", prompt: "Fais un brief quotidien: décisions requises, dossiers chauds, dossiers incomplets. Uniquement les faits du CRM.", Icon: FileText, color: "bg-[#DBEAFE] text-[#2563EB]" },
@@ -19,6 +20,7 @@ function Sections({ text }: { text: string }) {
 }
 
 export function AssistantHome({ context }: { context: AssistantContext }) {
+  const { t } = useLocale();
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -53,8 +55,8 @@ export function AssistantHome({ context }: { context: AssistantContext }) {
   return (
     <div className="animate-fade-in space-y-4">
       <div>
-        <h1 className="text-[26px] font-bold text-[#1B2B44]">IA U-investors</h1>
-        <p className="text-[13px] text-ink-3">Votre copilote pour analyser, résumer et agir sur l'ensemble des données du fonds.</p>
+        <h1 className="text-[26px] font-bold text-[#1B2B44]">{t("erp.aiTitle")}</h1>
+        <p className="text-[13px] text-ink-3">{t("erp.aiSubtitle")}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {PRESETS.map((p) => (
@@ -78,7 +80,7 @@ export function AssistantHome({ context }: { context: AssistantContext }) {
           </div>
           <div ref={box} className="flex-1 space-y-3 overflow-y-auto px-4 py-4 text-[13px]">
             <div className="rounded-2xl bg-[#F5F7FA] p-4">
-              Bonjour Driss, que souhaitez-vous analyser aujourd'hui ?
+              {t("erp.aiHello")}
               <div className="mt-3 flex flex-wrap gap-2">
                 {["Résume-moi le #1 du pipeline", "Prépare les questions pour le prochain IC", "Compare les opportunités fintech"].map((s) => (
                   <button key={s} type="button" onClick={() => send(s)} className="rounded-full border border-line bg-white px-3 py-1 text-[12px] hover:bg-cvd-soft">

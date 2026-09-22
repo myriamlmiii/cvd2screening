@@ -8,6 +8,7 @@ import { Check, ChevronDown, Database, FileUp, FolderKanban, Globe, Mail, Sparkl
 import { Button } from "@/components/ui/Button";
 import { ErpOverlay } from "@/components/erp/Overlay";
 import { toast } from "@/components/ui/Toaster";
+import { useLocale } from "@/lib/i18n";
 
 const STEPS = ["Import des sources", "Pré-remplissage", "Validation équipe", "Intégration pipeline"];
 const SOURCES = [
@@ -28,6 +29,7 @@ const manualSchema = z.object({
 type ManualValues = z.infer<typeof manualSchema>;
 
 export function NewOpportunityModal({ onClose }: { onClose: () => void }) {
+  const { t } = useLocale();
   const [manual, setManual] = useState(false);
   const form = useForm<ManualValues>({
     resolver: zodResolver(manualSchema),
@@ -67,7 +69,7 @@ export function NewOpportunityModal({ onClose }: { onClose: () => void }) {
             <span className="font-semibold">Import automatique</span>
             <span className="rounded-full bg-[#DCFCE7] px-2 py-0.5 text-[11px] font-medium text-[#15803d]">Méthode recommandée</span>
           </div>
-          <p className="mb-3 text-[12px] text-ink-3">Déposez les sources du dossier. L'extraction n'écrit dans le pipeline qu'après validation.</p>
+          <p className="mb-3 text-[12px] text-ink-3">{t("erp.oppDropHint")}</p>
           <div className="mb-3 grid grid-cols-3 gap-2">
             {SOURCES.map((s) => (
               <button key={s.label} type="button" className="flex items-center gap-2 rounded-xl border border-line px-3 py-2 text-left text-[12px] hover:bg-[#F5F7FA]">
@@ -84,7 +86,7 @@ export function NewOpportunityModal({ onClose }: { onClose: () => void }) {
         </div>
         <div className="mb-4 rounded-2xl border border-line p-4">
           <div className="mb-2 flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold">Champs détectés par l'IA</h3>
+            <h3 className="text-[13px] font-semibold">{t("erp.oppFields")}</h3>
             <span className="rounded-full bg-[#DCFCE7] px-2 py-0.5 text-[11px] text-[#15803d]">0 sur {FIELDS.length} détectés</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-[12px] text-ink-2">
@@ -103,7 +105,7 @@ export function NewOpportunityModal({ onClose }: { onClose: () => void }) {
             <span className="font-semibold text-[#92400e]">Validation requise avant intégration</span>
             <span className="rounded-full bg-white px-2 py-0.5 text-[11px] text-[#b45309]">En attente de validation</span>
           </div>
-          <p className="mt-1 text-[12px] text-[#92400e]/80">Rien n'est créé en base tant qu'un membre de l'équipe n'a pas validé. Pas de startup fictive.</p>
+          <p className="mt-1 text-[12px] text-[#92400e]/80">{t("erp.oppNoFake")}</p>
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="secondary" type="button" onClick={() => toast.message("Prévisualisation", { description: "Aucun champ IA détecté pour l'instant." })}>
