@@ -23,7 +23,7 @@ export function readThemeMode(): ThemeMode {
   } catch {
     /* ignore */
   }
-  return "dark";
+  return "light";
 }
 
 export function applyThemeMode(mode: ThemeMode, x?: number, y?: number) {
@@ -58,7 +58,7 @@ export function applyThemeToggle(x?: number, y?: number) {
 
 export function ThemeToggle({ className }: { label?: string; className?: string }) {
   const { t } = useLocale();
-  const [mode, setMode] = useState<ThemeMode>("dark");
+  const [mode, setMode] = useState<ThemeMode>("light");
 
   useEffect(() => {
     const sync = () => setMode(readThemeMode());
@@ -102,11 +102,12 @@ export const THEME_INIT_SCRIPT = `
     var stored = localStorage.getItem("${STORAGE_KEY}");
     var dark;
     if (stored === "light") dark = false;
+    else if (stored === "dark") dark = true;
     else if (stored === "system") dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    else dark = true;
+    else dark = false;
     document.documentElement.classList.toggle("dark", dark);
   } catch (e) {
-    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("dark");
   }
 })();
 `;

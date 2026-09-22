@@ -14,6 +14,7 @@ import {
   Sparkles,
   Settings,
 } from "lucide-react";
+import { UMark } from "@/components/brand/UMark";
 import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +38,7 @@ export function ErpSidebar({ taskCount = 0 }: { taskCount?: number }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[230px] flex-col bg-[#1B2B44] text-white md:flex">
       <div className="flex items-center gap-2 px-5 pb-5 pt-6">
-        <BarChart3 className="h-5 w-5 text-white" />
+        <UMark size={28} className="shrink-0" />
         <div className="text-[16px] font-bold tracking-tight">U-investors</div>
       </div>
       <nav className="flex-1 space-y-0.5 px-3">
